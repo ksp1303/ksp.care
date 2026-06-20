@@ -4,15 +4,14 @@ WORKDIR /src
 
 # Reduce memory usage during build
 ENV DOTNET_EnableDiagnostics=0
-ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
 # Copy project file and restore dependencies
 COPY ksp.care.csproj ./
-RUN dotnet restore
+RUN dotnet restore ksp.care.csproj
 
 # Copy everything else and build
 COPY . .
-RUN dotnet publish -c Release -o /app/publish --no-restore
+RUN dotnet publish ksp.care.csproj -c Release -o /app/publish --no-restore
 
 # Runtime stage (smaller image)
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
