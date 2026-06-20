@@ -1,0 +1,173 @@
+@{
+    ViewData["Title"] = "Analytics";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!-- Summary Cards -->
+<div class="grid grid-cols-2 lg:grid-cols-5 gap-5 mb-8">
+    <div class="glass-panel rounded-2xl p-6 border border-white/10">
+        <div class="flex items-center justify-between mb-3">
+            <span class="text-white/50 text-[11px] font-bold uppercase tracking-wider">Revenue</span>
+            <i class="bi bi-graph-up-arrow text-green-500 text-lg"></i>
+        </div>
+        <div class="text-3xl font-bold text-green-400">&#8377;@(((decimal)ViewBag.TotalRevenue).ToString("N0"))</div>
+    </div>
+    <div class="glass-panel rounded-2xl p-6 border border-white/10">
+        <div class="flex items-center justify-between mb-3">
+            <span class="text-white/50 text-[11px] font-bold uppercase tracking-wider">Billed</span>
+            <i class="bi bi-receipt text-blue-500 text-lg"></i>
+        </div>
+        <div class="text-3xl font-bold text-blue-400">&#8377;@(((decimal)ViewBag.TotalBilled).ToString("N0"))</div>
+    </div>
+    <div class="glass-panel rounded-2xl p-6 border border-white/10">
+        <div class="flex items-center justify-between mb-3">
+            <span class="text-white/50 text-[11px] font-bold uppercase tracking-wider">Avg Bill</span>
+            <i class="bi bi-calculator text-yellow-500 text-lg"></i>
+        </div>
+        <div class="text-3xl font-bold text-yellow-400">&#8377;@(((decimal)ViewBag.AvgBillValue).ToString("N0"))</div>
+    </div>
+    <div class="glass-panel rounded-2xl p-6 border border-white/10">
+        <div class="flex items-center justify-between mb-3">
+            <span class="text-white/50 text-[11px] font-bold uppercase tracking-wider">Appointments</span>
+            <i class="bi bi-calendar-check text-purple-500 text-lg"></i>
+        </div>
+        <div class="text-3xl font-bold text-purple-400">@ViewBag.TotalAppointments</div>
+    </div>
+    <div class="glass-panel rounded-2xl p-6 border border-white/10">
+        <div class="flex items-center justify-between mb-3">
+            <span class="text-white/50 text-[11px] font-bold uppercase tracking-wider">This Month</span>
+            <i class="bi bi-activity text-orange-500 text-lg"></i>
+        </div>
+        <div class="text-3xl font-bold text-orange-400">@ViewBag.TestsThisMonth</div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="grid lg:grid-cols-2 gap-8 mb-8">
+    <!-- Revenue Chart -->
+    <div class="glass-panel rounded-[24px] border border-white/10 p-6">
+        <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
+            <i class="bi bi-bar-chart text-blue-400"></i> Monthly Revenue
+        </h3>
+        <div style="height: 300px;">
+            <canvas id="revenueChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Popular Tests -->
+    <div class="glass-panel rounded-[24px] border border-white/10 p-6">
+        <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
+            <i class="bi bi-trophy text-yellow-400"></i> Popular Tests / Packages
+        </h3>
+        <div style="height: 300px;">
+            <canvas id="testsChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Status Distribution -->
+<div class="glass-panel rounded-[24px] border border-white/10 p-6">
+    <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
+        <i class="bi bi-pie-chart text-teal-400"></i> Appointment Status Distribution
+    </h3>
+    <div class="max-w-[400px] mx-auto" style="height: 300px;">
+        <canvas id="statusChart"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+    Chart.defaults.color = 'rgba(255,255,255,0.5)';
+    Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+    Chart.defaults.font.family = "'General Sans', sans-serif";
+
+    // Revenue Chart
+    new Chart(document.getElementById('revenueChart'), {
+        type: 'bar',
+        data: {
+            labels: @Html.Raw(ViewBag.RevenueLabels),
+            datasets: [
+                {
+                    label: 'Revenue Collected',
+                    data: @Html.Raw(ViewBag.RevenueData),
+                    backgroundColor: 'rgba(34, 197, 94, 0.3)',
+                    borderColor: 'rgba(34, 197, 94, 0.8)',
+                    borderWidth: 2,
+                    borderRadius: 8
+                },
+                {
+                    label: 'Total Billed',
+                    data: @Html.Raw(ViewBag.BilledData),
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    borderColor: 'rgba(59, 130, 246, 0.6)',
+                    borderWidth: 2,
+                    borderRadius: 8
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'top' } },
+            scales: {
+                y: { beginAtZero: true, ticks: { callback: v => '₹' + v.toLocaleString() } }
+            }
+        }
+    });
+
+    // Popular Tests Chart
+    new Chart(document.getElementById('testsChart'), {
+        type: 'bar',
+        data: {
+            labels: @Html.Raw(ViewBag.TestLabels),
+            datasets: [{
+                label: 'Bookings',
+                data: @Html.Raw(ViewBag.TestData),
+                backgroundColor: [
+                    'rgba(59,130,246,0.3)', 'rgba(168,85,247,0.3)', 'rgba(34,197,94,0.3)',
+                    'rgba(251,191,36,0.3)', 'rgba(239,68,68,0.3)', 'rgba(20,184,166,0.3)',
+                    'rgba(249,115,22,0.3)', 'rgba(236,72,153,0.3)', 'rgba(99,102,241,0.3)', 'rgba(156,163,175,0.3)'
+                ],
+                borderColor: [
+                    'rgba(59,130,246,0.8)', 'rgba(168,85,247,0.8)', 'rgba(34,197,94,0.8)',
+                    'rgba(251,191,36,0.8)', 'rgba(239,68,68,0.8)', 'rgba(20,184,166,0.8)',
+                    'rgba(249,115,22,0.8)', 'rgba(236,72,153,0.8)', 'rgba(99,102,241,0.8)', 'rgba(156,163,175,0.8)'
+                ],
+                borderWidth: 2,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    // Status Chart
+    new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: @Html.Raw(ViewBag.StatusLabels),
+            datasets: [{
+                data: @Html.Raw(ViewBag.StatusData),
+                backgroundColor: [
+                    'rgba(251,191,36,0.4)', 'rgba(34,197,94,0.4)', 'rgba(59,130,246,0.4)',
+                    'rgba(239,68,68,0.4)', 'rgba(168,85,247,0.4)', 'rgba(20,184,166,0.4)'
+                ],
+                borderColor: [
+                    'rgba(251,191,36,0.8)', 'rgba(34,197,94,0.8)', 'rgba(59,130,246,0.8)',
+                    'rgba(239,68,68,0.8)', 'rgba(168,85,247,0.8)', 'rgba(20,184,166,0.8)'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '55%',
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+</script>

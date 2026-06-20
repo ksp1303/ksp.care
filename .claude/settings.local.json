@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.lalpathlabs.com)",
+      "WebFetch(domain:www.metropolisindia.com)",
+      "Bash(curl -sL -o /tmp/tailwindcss \"https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-macos-arm64\")",
+      "Bash(chmod +x /tmp/tailwindcss)",
+      "Bash(/tmp/tailwindcss --help)",
+      "Bash(/tmp/tailwindcss -i Styles/tailwind.input.css -o wwwroot/css/tailwind.css --minify)",
+      "Bash(dotnet build *)"
+    ]
+  }
+}

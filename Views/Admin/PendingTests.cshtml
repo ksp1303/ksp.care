@@ -1,0 +1,80 @@
+@model ksp.care.Helpers.PaginatedList<ksp.care.Models.AppointmentRecord>
+@{
+    ViewData["Title"] = "Pending Tests";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="mb-6">
+    <h1 class="text-2xl font-bold text-white mb-1 flex items-center gap-3">
+        <i class="bi bi-hourglass-split text-yellow-400"></i> Pending Tests
+    </h1>
+    <p class="text-white/40 text-sm m-0">Appointments awaiting lab results to be uploaded.</p>
+</div>
+
+<div class="glass-panel rounded-[24px] border border-white/10 bg-white/[0.02] overflow-hidden">
+    <div class="flex flex-wrap items-center justify-between gap-4 px-6 py-5 border-b border-white/10">
+        <h2 class="text-xl font-bold text-white m-0">Pending Tests (Awaiting Results)</h2>
+        <form method="get" class="flex items-center gap-2">
+            <input type="text" name="search" value="@ViewBag.Search" placeholder="Search..."
+                class="bg-white/5 border border-white/10 text-white text-sm rounded-lg px-4 py-2 outline-none focus:border-blue-500/50 w-64" />
+            <button type="submit" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm font-bold rounded-lg transition-colors">
+                <i class="bi bi-search"></i>
+            </button>
+        </form>
+    </div>
+
+    @if (!Model.Any()) {
+        <div class="p-16 text-center">
+            <i class="bi bi-check-circle text-5xl text-green-500/30 block mb-3"></i>
+            <p class="text-white/40 font-medium">No pending tests. All results have been uploaded!</p>
+        </div>
+    } else {
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-white/10">
+                        <th class="px-5 py-4 text-white/40 text-[11px] font-bold uppercase tracking-wider">Booking ID</th>
+                        <th class="px-5 py-4 text-white/40 text-[11px] font-bold uppercase tracking-wider">Patient Name</th>
+                        <th class="px-5 py-4 text-white/40 text-[11px] font-bold uppercase tracking-wider">Mobile Number</th>
+                        <th class="px-5 py-4 text-white/40 text-[11px] font-bold uppercase tracking-wider">Package/Test</th>
+                        <th class="px-5 py-4 text-white/40 text-[11px] font-bold uppercase tracking-wider">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    @foreach (var apt in Model) {
+                        <tr class="hover:bg-white/[0.02] transition-colors">
+                            <td class="px-5 py-4 font-mono text-purple-400 text-sm font-bold">BK-@apt.Id.ToString("D4")</td>
+                            <td class="px-5 py-4 text-white font-semibold text-sm">@apt.PatientName</td>
+                            <td class="px-5 py-4 text-white/80 text-sm">@apt.PatientMobile</td>
+                            <td class="px-5 py-4 text-white/80 text-sm">@apt.PackageName</td>
+                            <td class="px-5 py-4">
+                                <a href="/Admin/Report?patientMobile=@apt.PatientMobile&testName=@apt.PackageName" 
+                                   class="px-4 py-1.5 bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 border border-blue-500/30 text-xs font-bold rounded-lg transition-colors no-underline">
+                                    Add Result
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    @if (Model.TotalPages > 1) {
+        <div class="flex items-center justify-center gap-3 px-6 py-5 border-t border-white/10">
+            @if (Model.HasPreviousPage) {
+                <a href="/Admin/PendingTests?page=@(Model.PageIndex - 1)&search=@ViewBag.Search"
+                   class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm font-bold rounded-lg transition-colors no-underline">
+                    <i class="bi bi-chevron-left"></i> Previous
+                </a>
+            }
+            <span class="text-white/40 text-sm">Page @Model.PageIndex of @Model.TotalPages</span>
+            @if (Model.HasNextPage) {
+                <a href="/Admin/PendingTests?page=@(Model.PageIndex + 1)&search=@ViewBag.Search"
+                   class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm font-bold rounded-lg transition-colors no-underline">
+                    Next <i class="bi bi-chevron-right"></i>
+                </a>
+            }
+        </div>
+    }
+</div>

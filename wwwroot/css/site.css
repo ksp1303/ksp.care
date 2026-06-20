@@ -1,0 +1,344 @@
+/* ══════════════════════════════════════════════════════════════
+   KSP Care — Global Design System
+   Premium dark theme with glassmorphism & micro-animations
+   ══════════════════════════════════════════════════════════════ */
+
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
+
+/* ── Reset & Base ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+    font-size: 14px;
+    scroll-behavior: smooth;
+    background-color: #030305;
+}
+@media (min-width: 768px) { html { font-size: 16px; } }
+
+body {
+    font-family: 'General Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #030305;
+    color: #ffffff;
+    line-height: 1.6;
+    overflow-x: hidden;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+a { text-decoration: none; color: inherit; }
+img { max-width: 100%; display: block; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; }
+input, textarea, select { font-family: inherit; }
+
+/* ── Scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #030305; }
+::-webkit-scrollbar-thumb { background: #1a1a2e; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #2a2a4e; }
+
+/* ── Design Tokens ────────────────────────────────────────── */
+:root {
+    --bg-primary: #030305;
+    --bg-secondary: #08080c;
+    --bg-card: rgba(255, 255, 255, 0.02);
+    --bg-card-hover: rgba(255, 255, 255, 0.05);
+    --border-subtle: rgba(255, 255, 255, 0.06);
+    --border-medium: rgba(255, 255, 255, 0.10);
+    --border-strong: rgba(255, 255, 255, 0.15);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.60);
+    --text-muted: rgba(255, 255, 255, 0.35);
+    --accent-blue: #3b82f6;
+    --accent-blue-glow: rgba(59, 130, 246, 0.15);
+    --accent-green: #10b981;
+    --accent-purple: #8b5cf6;
+    --accent-amber: #f59e0b;
+    --accent-red: #ef4444;
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+    --radius-full: 9999px;
+    --shadow-glow: 0 0 60px rgba(59, 130, 246, 0.08);
+    --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+    --transition-fast: 0.15s ease;
+    --transition-base: 0.25s ease;
+    --transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Typography ───────────────────────────────────────────── */
+.text-gradient {
+    background: linear-gradient(135deg, #ffffff 30%, rgba(255,255,255,0.4) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.text-gradient-blue {
+    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ── Glass Panels ─────────────────────────────────────────── */
+.glass-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+.glass-panel-elevated {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-medium);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-card);
+}
+
+/* ── Buttons ──────────────────────────────────────────────── */
+.btn-wrapper {
+    position: relative;
+    display: inline-flex;
+    border-radius: var(--radius-full);
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.08));
+    overflow: hidden;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    text-decoration: none;
+}
+.btn-wrapper:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.15));
+}
+
+.btn-inner-nav {
+    background-color: #0a0a0e;
+    color: #ffffff;
+    border-radius: var(--radius-full);
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    width: 100%;
+    text-align: center;
+    transition: all var(--transition-fast);
+}
+
+.btn-inner-cta {
+    background-color: #ffffff;
+    color: #000000;
+    border-radius: var(--radius-full);
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    width: 100%;
+    text-align: center;
+    transition: all var(--transition-fast);
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 32px;
+    background: var(--accent-blue);
+    color: white;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-size: 14px;
+    transition: all var(--transition-base);
+    border: none;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+.btn-primary:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+}
+
+.btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 32px;
+    background: transparent;
+    color: rgba(255,255,255,0.7);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-full);
+    font-weight: 500;
+    font-size: 14px;
+    transition: all var(--transition-base);
+}
+.btn-ghost:hover {
+    background: rgba(255,255,255,0.05);
+    color: white;
+    border-color: var(--border-strong);
+    transform: translateY(-2px);
+}
+
+/* ── Form Inputs ──────────────────────────────────────────── */
+.custom-input {
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid var(--border-subtle) !important;
+    color: white !important;
+    border-radius: var(--radius-md) !important;
+    padding: 14px 16px !important;
+    font-size: 14px !important;
+    width: 100% !important;
+    outline: none !important;
+    transition: all var(--transition-base) !important;
+}
+.custom-input:focus {
+    border-color: var(--accent-blue) !important;
+    background-color: rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 0 0 0 3px var(--accent-blue-glow) !important;
+}
+.custom-input::placeholder {
+    color: var(--text-muted);
+}
+select.custom-input option {
+    background-color: #0a0a0c !important;
+    color: white !important;
+}
+
+/* ── Badge / Tags ─────────────────────────────────────────── */
+.badge-glow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+/* ── Animations ───────────────────────────────────────────── */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-30px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse-ring {
+    0%   { transform: scale(0.95); opacity: 1; }
+    50%  { transform: scale(1.05); opacity: 0.7; }
+    100% { transform: scale(0.95); opacity: 1; }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50%      { transform: translateY(-8px); }
+}
+
+@keyframes gradient-shift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+.animate-spin { animation: spin 1s linear infinite; }
+
+.anim-fade-up { animation: fadeInUp 0.6s ease forwards; }
+.anim-fade-up-delay-1 { animation: fadeInUp 0.6s ease 0.1s forwards; opacity: 0; }
+.anim-fade-up-delay-2 { animation: fadeInUp 0.6s ease 0.2s forwards; opacity: 0; }
+.anim-fade-up-delay-3 { animation: fadeInUp 0.6s ease 0.3s forwards; opacity: 0; }
+.anim-fade-up-delay-4 { animation: fadeInUp 0.6s ease 0.4s forwards; opacity: 0; }
+.anim-fade-in { animation: fadeIn 0.8s ease forwards; }
+
+/* ── Modal ────────────────────────────────────────────────── */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.80);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    transition: all 0.3s ease;
+}
+.modal-overlay.modal-show { opacity: 1; visibility: visible; }
+
+.modal-box {
+    background: #0a0a0e;
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 460px;
+    padding: 32px;
+    position: relative;
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+}
+.modal-show .modal-box { transform: scale(1); }
+
+/* ── Section Helpers ──────────────────────────────────────── */
+.section-divider {
+    border: none;
+    border-top: 1px solid var(--border-subtle);
+    margin: 0;
+}
+
+/* ── Responsive Container ─────────────────────────────────── */
+.container-narrow { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+.container-wide   { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.container-full   { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+
+/* ── Utility ──────────────────────────────────────────────── */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+/* Focus ring for accessibility */
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem #000000, 0 0 0 0.25rem rgba(255,255,255,0.2);
+}
+
+/* ── Reduced Motion ───────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

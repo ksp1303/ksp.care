@@ -1,0 +1,1012 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Home";
+
+    // Package prices come from the DB (Admin → Tests) so the homepage always
+    // matches what patients are billed; hardcoded values are only a fallback.
+    var dbPackages = ViewBag.Packages as List<ksp.care.Models.TestRecord>;
+    string PkgPrice(string name, decimal fallback)
+    {
+        var price = dbPackages?.FirstOrDefault(p => p.TestName == name)?.Price ?? fallback;
+        return "₹" + price.ToString("N0");
+    }
+}
+
+<style>
+    /* ── Hero Background ─────────────────────────────────────── */
+    .hero-section {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .hero-bg-video {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background:
+            radial-gradient(ellipse 60% 50% at 20% 20%, rgba(59,130,246,0.18), transparent 60%),
+            radial-gradient(ellipse 50% 40% at 80% 60%, rgba(139,92,246,0.12), transparent 60%),
+            #030305;
+    }
+    .hero-bg-video video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .hero-bg-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg,
+            rgba(3,3,5,0.3) 0%,
+            rgba(3,3,5,0.5) 40%,
+            rgba(3,3,5,0.85) 70%,
+            rgba(3,3,5,1) 100%
+        );
+        z-index: 1;
+    }
+
+    /* ── Floating Orbs ───────────────────────────────────────── */
+    .orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.4;
+        z-index: 0;
+        pointer-events: none;
+    }
+    .orb-1 {
+        width: 400px;
+        height: 400px;
+        background: rgba(59, 130, 246, 0.15);
+        top: 10%;
+        left: -5%;
+        animation: float 8s ease-in-out infinite;
+    }
+    .orb-2 {
+        width: 300px;
+        height: 300px;
+        background: rgba(139, 92, 246, 0.1);
+        top: 30%;
+        right: -5%;
+        animation: float 10s ease-in-out infinite reverse;
+    }
+
+    /* ── Hero Nav ─────────────────────────────────────────────── */
+    .hero-nav {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        background: rgba(3,3,5,0.6);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        transition: all 0.3s ease;
+    }
+    .hero-nav.scrolled {
+        background: rgba(3,3,5,0.95);
+        border-bottom-color: rgba(255,255,255,0.1);
+    }
+
+    /* ── Nav Links ─────────────────────────────────────────── */
+    .nav-link-hero {
+        position: relative;
+        font-size: 13px;
+        font-weight: 500;
+        color: rgba(255,255,255,0.5);
+        padding: 6px 0;
+        transition: color 0.2s;
+    }
+    .nav-link-hero:hover { color: white; }
+    .nav-link-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: var(--accent-blue);
+        border-radius: 1px;
+        transition: all 0.25s;
+        transform: translateX(-50%);
+    }
+    .nav-link-hero:hover::after { width: 100%; }
+
+    /* ── Hero Content ─────────────────────────────────────────── */
+    .hero-title {
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-weight: 700;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+    }
+
+    /* ── Stats Counter ────────────────────────────────────────── */
+    .stat-item {
+        text-align: center;
+        padding: 0 24px;
+    }
+    .stat-item + .stat-item {
+        border-left: 1px solid rgba(255,255,255,0.08);
+    }
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 6px;
+    }
+    .stat-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: rgba(255,255,255,0.35);
+    }
+
+    /* ── Feature Cards ────────────────────────────────────────── */
+    .feature-card {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 20px;
+        padding: 32px;
+        transition: all 0.35s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(59,130,246,0.3), transparent);
+        opacity: 0;
+        transition: opacity 0.35s;
+    }
+    .feature-card:hover {
+        background: rgba(255,255,255,0.04);
+        border-color: rgba(255,255,255,0.12);
+        transform: translateY(-4px);
+    }
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        transition: all 0.3s;
+    }
+    .feature-card:hover .feature-icon { transform: scale(1.1); }
+
+    /* ── Package Cards ────────────────────────────────────────── */
+    .package-card {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 20px;
+        padding: 32px 28px;
+        text-align: center;
+        transition: all 0.35s ease;
+        cursor: pointer;
+        position: relative;
+    }
+    .package-card::after {
+        content: '';
+        position: absolute;
+        inset: -1px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, rgba(59,130,246,0.2), transparent, rgba(139,92,246,0.15));
+        opacity: 0;
+        z-index: -1;
+        transition: opacity 0.35s;
+    }
+    .package-card:hover {
+        background: rgba(255,255,255,0.04);
+        transform: translateY(-6px);
+    }
+    .package-card:hover::after { opacity: 1; }
+
+    .package-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        transition: all 0.3s;
+    }
+    .package-card:hover .package-icon { transform: scale(1.1) rotate(5deg); }
+
+    /* ── Profile Form ─────────────────────────────────────────── */
+    .profile-form-card {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 28px;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+        position: relative;
+        overflow: hidden;
+    }
+    .profile-form-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 20%;
+        right: 20%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(59,130,246,0.4), transparent);
+    }
+
+    /* ── Section Headers ──────────────────────────────────────── */
+    .section-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        border-radius: 100px;
+        background: rgba(59,130,246,0.08);
+        border: 1px solid rgba(59,130,246,0.15);
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: rgba(59,130,246,0.8);
+        margin-bottom: 20px;
+    }
+
+    /* ── CTA Section ──────────────────────────────────────────── */
+    .cta-section {
+        position: relative;
+        border-radius: 28px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+    .cta-section::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(139,92,246,0.06) 50%, rgba(59,130,246,0.04) 100%);
+    }
+
+    /* ── Mobile Menu (on homepage) ────────────────────────────── */
+    .mobile-menu-home {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 280px;
+        height: 100vh;
+        background: #0a0a0e;
+        border-left: 1px solid rgba(255,255,255,0.06);
+        z-index: 200;
+        transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        padding: 80px 32px 32px;
+    }
+    .mobile-menu-home.open { right: 0; }
+    .mobile-overlay-home {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        z-index: 199;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s;
+    }
+    .mobile-overlay-home.open { opacity: 1; visibility: visible; }
+
+    /* ── FAQ Accordion ────────────────────────────────────────── */
+    .faq-item {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 16px;
+        transition: border-color 0.25s ease;
+    }
+    .faq-item[open] { border-color: rgba(59,130,246,0.3); }
+    .faq-item summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 20px 24px;
+        cursor: pointer;
+        list-style: none;
+        color: white;
+        font-weight: 600;
+        font-size: 15px;
+    }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-chevron {
+        color: rgba(255,255,255,0.35);
+        transition: transform 0.25s ease;
+        flex-shrink: 0;
+    }
+    .faq-item[open] .faq-chevron { transform: rotate(180deg); color: var(--accent-blue); }
+    .faq-item > p {
+        padding: 0 24px 20px;
+        margin: 0;
+        color: rgba(255,255,255,0.45);
+        font-size: 14px;
+        line-height: 1.7;
+    }
+</style>
+
+<div class="hero-section">
+    <!-- Background Video -->
+    <div class="hero-bg-video">
+        <video autoplay loop muted playsinline id="heroVideo">
+            <source src="~/videos/hero.mp4" type="video/mp4">
+        </video>
+        <div class="hero-bg-overlay"></div>
+    </div>
+
+    <!-- Floating Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <!-- ═══ Navbar ═══ -->
+    <nav class="hero-nav w-full flex items-center justify-between px-6 md:px-12 lg:px-16 py-4" id="heroNav">
+        <a href="/" class="flex items-center gap-2.5 no-underline group relative z-10" aria-label="KSP Care Home">
+            <div class="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
+                <i class="bi bi-droplet-fill text-blue-500 text-lg"></i>
+            </div>
+            <span class="text-xl font-bold text-white lowercase">ksp<span class="text-blue-500">care</span></span>
+        </a>
+
+        <div class="hidden lg:flex items-center gap-8 relative z-10">
+            <a href="/Home/About" class="nav-link-hero">About Us</a>
+            <a href="#services" class="nav-link-hero">Services</a>
+            <a href="#packages" class="nav-link-hero">Health Packages</a>
+            <a href="#doctors" class="nav-link-hero">Doctors</a>
+            <a href="/Home/Contact" class="nav-link-hero">Contact</a>
+            <a href="#create-profile" class="nav-link-hero">Get Started</a>
+        </div>
+
+        <div class="flex items-center gap-3 relative z-10">
+            <a href="/Home/AdminLogin" class="btn-wrapper hidden sm:inline-flex"><div class="btn-inner-nav">Staff Login</div></a>
+            <a href="/Home/UserLogin" class="btn-wrapper"><div class="btn-inner-cta">Patient Login</div></a>
+            <button id="heroMobileBtn" class="lg:hidden w-10 h-10 flex items-center justify-center text-white/60 hover:text-white transition-colors" aria-label="Open menu">
+                <i class="bi bi-list text-2xl"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-overlay-home" id="heroMobileOverlay"></div>
+    <div class="mobile-menu-home" id="heroMobileMenu">
+        <button id="heroMobileClose" class="absolute top-6 right-6 text-white/50 hover:text-white text-2xl transition-colors"><i class="bi bi-x-lg"></i></button>
+        <div class="flex flex-col gap-2">
+            <a href="/Home/About" class="flex items-center gap-3 py-3 px-4 rounded-xl text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all"><i class="bi bi-info-circle text-lg"></i> About Us</a>
+            <a href="#services" class="flex items-center gap-3 py-3 px-4 rounded-xl text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all" onclick="closeMobileHome()"><i class="bi bi-grid text-lg"></i> Services</a>
+            <a href="#packages" class="flex items-center gap-3 py-3 px-4 rounded-xl text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all" onclick="closeMobileHome()"><i class="bi bi-box text-lg"></i> Health Packages</a>
+            <a href="#doctors" class="flex items-center gap-3 py-3 px-4 rounded-xl text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all" onclick="closeMobileHome()"><i class="bi bi-person-badge text-lg"></i> Doctors</a>
+            <a href="/Home/Contact" class="flex items-center gap-3 py-3 px-4 rounded-xl text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all"><i class="bi bi-telephone text-lg"></i> Contact</a>
+            <a href="#create-profile" class="flex items-center gap-3 py-3 px-4 rounded-xl text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all" onclick="closeMobileHome()"><i class="bi bi-person-plus text-lg"></i> Get Started</a>
+            <hr class="border-white/10 my-4" />
+            <a href="/Home/AdminLogin" class="flex items-center gap-3 py-3 px-4 rounded-xl text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all"><i class="bi bi-person-badge text-lg"></i> Staff Login</a>
+            <a href="/Home/UserLogin" class="flex items-center gap-3 py-3 px-4 rounded-xl text-sm font-medium text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 transition-all"><i class="bi bi-person text-lg"></i> Patient Login</a>
+        </div>
+    </div>
+
+    <!-- ═══ Hero Content ═══ -->
+    <div class="relative z-10 flex-grow flex flex-col items-center justify-center text-center px-6 py-20 md:py-32">
+        <div class="anim-fade-up">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm mb-8">
+                <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                <span class="text-[12px] font-semibold text-white/60">LIMS Platform Active — <span class="text-white">Manipal & Udupi</span></span>
+            </div>
+        </div>
+
+        <h1 class="hero-title text-gradient mb-6 max-w-[800px] anim-fade-up-delay-1">
+            Diagnostics at the<br>Speed of Experience
+        </h1>
+
+        <p class="text-white/50 max-w-[560px] mb-10 text-[15px] md:text-base leading-relaxed anim-fade-up-delay-2">
+            Powering seamless healthcare experiences with real-time diagnostics, digital reports, and home sample collection across the coastal Karnataka region.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center gap-4 anim-fade-up-delay-3">
+            <a href="#create-profile" class="btn-primary px-8 py-4">
+                <i class="bi bi-person-plus"></i> Create Health Profile
+            </a>
+            <a href="#services" class="btn-ghost px-8 py-4">
+                <i class="bi bi-arrow-down-short text-lg"></i> Explore Services
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION: Stats / Social Proof
+     ═══════════════════════════════════════════════════════════ -->
+<section class="relative bg-[#030305] py-16 border-b border-white/[0.04]">
+    <div class="max-w-[900px] mx-auto px-6">
+        <div class="flex flex-wrap justify-center gap-8 md:gap-0">
+            <div class="stat-item anim-fade-up">
+                <div class="stat-number text-white">1.5K<span class="text-blue-500">+</span></div>
+                <div class="stat-label">Daily Patients</div>
+            </div>
+            <div class="stat-item anim-fade-up-delay-1">
+                <div class="stat-number text-white">99<span class="text-green-500">%</span></div>
+                <div class="stat-label">Accuracy Rate</div>
+            </div>
+            <div class="stat-item anim-fade-up-delay-2">
+                <div class="stat-number text-white">24<span class="text-purple-400">/7</span></div>
+                <div class="stat-label">Lab Access</div>
+            </div>
+            <div class="stat-item anim-fade-up-delay-3">
+                <div class="stat-number text-white">50<span class="text-amber-400">+</span></div>
+                <div class="stat-label">Test Panels</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION: About
+     ═══════════════════════════════════════════════════════════ -->
+<section id="about" class="relative py-24 md:py-32 bg-[#030305]">
+    <div class="max-w-[1100px] mx-auto px-6">
+        <div class="text-center mb-16">
+            <div class="section-tag"><i class="bi bi-info-circle"></i> About Us</div>
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Trusted Healthcare Partner</h2>
+            <p class="text-white/45 max-w-[600px] mx-auto text-[15px] leading-relaxed">
+                KSP Care is a cutting-edge diagnostic powerhouse serving Manipal & Udupi with precision pathology, advanced LIMS technology, and compassionate care.
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+            <div class="feature-card">
+                <div class="feature-icon bg-blue-500/10 border border-blue-500/20">
+                    <i class="bi bi-house-heart text-blue-400 text-2xl"></i>
+                </div>
+                <h3 class="text-white font-bold text-lg mb-2">Home Collection</h3>
+                <p class="text-white/40 text-sm leading-relaxed">Trained phlebotomists visit your home for sample collection — comfort meets clinical precision.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon bg-green-500/10 border border-green-500/20">
+                    <i class="bi bi-shield-check text-green-400 text-2xl"></i>
+                </div>
+                <h3 class="text-white font-bold text-lg mb-2">NABL Certified</h3>
+                <p class="text-white/40 text-sm leading-relaxed">Every report backed by NABL-accredited processes, ensuring absolute accuracy and reliability.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon bg-purple-500/10 border border-purple-500/20">
+                    <i class="bi bi-graph-up-arrow text-purple-400 text-2xl"></i>
+                </div>
+                <h3 class="text-white font-bold text-lg mb-2">Digital Reports</h3>
+                <p class="text-white/40 text-sm leading-relaxed">Access your diagnostic results instantly through our secure patient portal — anytime, anywhere.</p>
+            </div>
+        </div>
+
+        <div class="text-center mt-10">
+            <a href="/Home/About" class="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm font-bold transition-colors no-underline">
+                Learn more about us <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION: Services / How It Works
+     ═══════════════════════════════════════════════════════════ -->
+<section id="services" class="relative py-24 md:py-32 bg-[#030305] border-t border-white/[0.04]">
+    <div class="max-w-[1100px] mx-auto px-6">
+        <div class="text-center mb-16">
+            <div class="section-tag"><i class="bi bi-lightning-charge"></i> How It Works</div>
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Simple. Fast. Reliable.</h2>
+            <p class="text-white/45 max-w-[550px] mx-auto text-[15px] leading-relaxed">
+                From booking to reports — your health journey in four simple steps.
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-4 gap-6">
+            <div class="feature-card text-center">
+                <div class="w-12 h-12 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mx-auto mb-5">
+                    <span class="text-blue-400 font-bold text-lg">1</span>
+                </div>
+                <h4 class="text-white font-bold text-base mb-2">Create Profile</h4>
+                <p class="text-white/40 text-sm">Register once with your details and get instant access.</p>
+            </div>
+            <div class="feature-card text-center">
+                <div class="w-12 h-12 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-5">
+                    <span class="text-green-400 font-bold text-lg">2</span>
+                </div>
+                <h4 class="text-white font-bold text-base mb-2">Book a Test</h4>
+                <p class="text-white/40 text-sm">Choose from 50+ tests and health packages online.</p>
+            </div>
+            <div class="feature-card text-center">
+                <div class="w-12 h-12 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-5">
+                    <span class="text-purple-400 font-bold text-lg">3</span>
+                </div>
+                <h4 class="text-white font-bold text-base mb-2">Sample Collected</h4>
+                <p class="text-white/40 text-sm">Our trained team collects samples at your doorstep.</p>
+            </div>
+            <div class="feature-card text-center">
+                <div class="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto mb-5">
+                    <span class="text-amber-400 font-bold text-lg">4</span>
+                </div>
+                <h4 class="text-white font-bold text-base mb-2">Get Reports</h4>
+                <p class="text-white/40 text-sm">Receive digital reports on your portal within hours.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION: Health Packages
+     ═══════════════════════════════════════════════════════════ -->
+<section id="packages" class="relative py-24 md:py-32 bg-[#030305] border-t border-white/[0.04]">
+    <div class="max-w-[1100px] mx-auto px-6">
+        <div class="text-center mb-16">
+            <div class="section-tag"><i class="bi bi-heart-pulse"></i> Health Packages</div>
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Comprehensive Care Plans</h2>
+            <p class="text-white/45 max-w-[550px] mx-auto text-[15px] leading-relaxed">
+                Click on a package to view included tests. Login to schedule your appointment.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="package-card" onclick="openPackageModal('basic')">
+                <div class="package-icon bg-blue-500/10 border border-blue-500/20">
+                    <i class="bi bi-shield-check text-blue-400 text-2xl"></i>
+                </div>
+                <h5 class="text-white text-lg font-bold mb-2">Basic Master Health</h5>
+                <p class="text-white/40 text-sm mb-3">40+ routine tests for overall wellness screening</p>
+                <div class="text-white font-bold text-xl mb-4">@PkgPrice("Basic Master Health", 1499m)</div>
+                <span class="text-blue-400/60 text-xs font-bold uppercase tracking-widest">View Details →</span>
+            </div>
+            <div class="package-card" onclick="openPackageModal('comprehensive')">
+                <div class="package-icon bg-green-500/10 border border-green-500/20">
+                    <i class="bi bi-activity text-green-400 text-2xl"></i>
+                </div>
+                <h5 class="text-white text-lg font-bold mb-2">Comprehensive Body</h5>
+                <p class="text-white/40 text-sm mb-3">60+ parameters including hormones & vitamins</p>
+                <div class="text-white font-bold text-xl mb-4">@PkgPrice("Comprehensive Body", 2999m)</div>
+                <span class="text-green-400/60 text-xs font-bold uppercase tracking-widest">View Details →</span>
+            </div>
+            <div class="package-card" onclick="openPackageModal('vitamin')">
+                <div class="package-icon bg-amber-500/10 border border-amber-500/20">
+                    <i class="bi bi-sun text-amber-400 text-2xl"></i>
+                </div>
+                <h5 class="text-white text-lg font-bold mb-2">Vitamin Profile</h5>
+                <p class="text-white/40 text-sm mb-3">B12, D, Calcium & essential micronutrients</p>
+                <div class="text-white font-bold text-xl mb-4">@PkgPrice("Vitamin Profile", 999m)</div>
+                <span class="text-amber-400/60 text-xs font-bold uppercase tracking-widest">View Details →</span>
+            </div>
+            <div class="package-card" onclick="openPackageModal('cardiac')">
+                <div class="package-icon bg-red-500/10 border border-red-500/20">
+                    <i class="bi bi-heart-pulse text-red-400 text-2xl"></i>
+                </div>
+                <h5 class="text-white text-lg font-bold mb-2">Cardiac Care</h5>
+                <p class="text-white/40 text-sm mb-3">Lipid profile, CRP & heart risk assessment</p>
+                <div class="text-white font-bold text-xl mb-4">@PkgPrice("Cardiac Care", 1799m)</div>
+                <span class="text-red-400/60 text-xs font-bold uppercase tracking-widest">View Details →</span>
+            </div>
+            <div class="package-card" onclick="openPackageModal('diabetes')">
+                <div class="package-icon bg-purple-500/10 border border-purple-500/20">
+                    <i class="bi bi-droplet-half text-purple-400 text-2xl"></i>
+                </div>
+                <h5 class="text-white text-lg font-bold mb-2">Diabetes Screening</h5>
+                <p class="text-white/40 text-sm mb-3">Glucose, HbA1c, insulin & kidney markers</p>
+                <div class="text-white font-bold text-xl mb-4">@PkgPrice("Diabetes Screening", 1299m)</div>
+                <span class="text-purple-400/60 text-xs font-bold uppercase tracking-widest">View Details →</span>
+            </div>
+            <div class="package-card" onclick="openPackageModal('thyroid')">
+                <div class="package-icon bg-teal-500/10 border border-teal-500/20">
+                    <i class="bi bi-moisture text-teal-400 text-2xl"></i>
+                </div>
+                <h5 class="text-white text-lg font-bold mb-2">Thyroid Panel</h5>
+                <p class="text-white/40 text-sm mb-3">Complete T3, T4, TSH & thyroid antibodies</p>
+                <div class="text-white font-bold text-xl mb-4">@PkgPrice("Thyroid Panel", 899m)</div>
+                <span class="text-teal-400/60 text-xs font-bold uppercase tracking-widest">View Details →</span>
+            </div>
+            <div class="package-card" onclick="openPackageModal('liver_kidney')">
+                <div class="package-icon bg-orange-500/10 border border-orange-500/20">
+                    <i class="bi bi-lungs text-orange-400 text-2xl"></i>
+                </div>
+                <h5 class="text-white text-lg font-bold mb-2">Liver & Kidney Panel</h5>
+                <p class="text-white/40 text-sm mb-3">LFT, KFT, electrolytes & urine analysis</p>
+                <div class="text-white font-bold text-xl mb-4">@PkgPrice("Liver & Kidney Panel", 1599m)</div>
+                <span class="text-orange-400/60 text-xs font-bold uppercase tracking-widest">View Details →</span>
+            </div>
+            <div class="package-card" onclick="openPackageModal('womens')">
+                <div class="package-icon bg-pink-500/10 border border-pink-500/20">
+                    <i class="bi bi-gender-female text-pink-400 text-2xl"></i>
+                </div>
+                <h5 class="text-white text-lg font-bold mb-2">Women's Health</h5>
+                <p class="text-white/40 text-sm mb-3">Hormones, iron, thyroid, calcium & CBC</p>
+                <div class="text-white font-bold text-xl mb-4">@PkgPrice("Women's Health", 2499m)</div>
+                <span class="text-pink-400/60 text-xs font-bold uppercase tracking-widest">View Details →</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION: Our Doctors
+     ═══════════════════════════════════════════════════════════ -->
+@{
+    var doctors = ViewBag.Doctors as List<ksp.care.Models.DoctorRecord>;
+    var doctorGradients = new[] {
+        "linear-gradient(135deg, #3b82f6, #1d4ed8)",
+        "linear-gradient(135deg, #8b5cf6, #6d28d9)",
+        "linear-gradient(135deg, #10b981, #047857)",
+        "linear-gradient(135deg, #f59e0b, #b45309)",
+        "linear-gradient(135deg, #ec4899, #be185d)",
+        "linear-gradient(135deg, #14b8a6, #0f766e)",
+        "linear-gradient(135deg, #ef4444, #b91c1c)",
+        "linear-gradient(135deg, #6366f1, #4338ca)"
+    };
+}
+@if (doctors != null && doctors.Count > 0)
+{
+<section id="doctors" class="relative py-24 md:py-32 bg-[#030305] border-t border-white/[0.04]">
+    <div class="max-w-[1100px] mx-auto px-6">
+        <div class="text-center mb-16">
+            <div class="section-tag"><i class="bi bi-person-badge"></i> Our Experts</div>
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Meet Our Doctors</h2>
+            <p class="text-white/45 max-w-[550px] mx-auto text-[15px] leading-relaxed">
+                A dedicated panel of specialists reviewing every report behind the scenes.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            @for (var i = 0; i < doctors.Count; i++)
+            {
+                var doc = doctors[i];
+                var parts = doc.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                var docInitials = string.Concat(parts.Take(2).Select(p => p[0])).ToUpper();
+                <div class="feature-card text-center !p-6">
+                    <div class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center text-white font-bold text-xl shadow-lg"
+                         style="background: @doctorGradients[i % doctorGradients.Length];">
+                        @docInitials
+                    </div>
+                    <h4 class="text-white font-bold text-base mb-1">Dr. @doc.Name</h4>
+                    <p class="text-white/40 text-[11px] font-bold uppercase tracking-wider m-0">@doc.Specialization</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+}
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION: Create Profile
+     ═══════════════════════════════════════════════════════════ -->
+<section id="create-profile" class="relative py-24 md:py-32 bg-[#030305] border-t border-white/[0.04]">
+    <div class="max-w-[900px] mx-auto px-6">
+        <div class="profile-form-card p-8 md:p-12">
+            <div class="text-center mb-10">
+                <div class="section-tag"><i class="bi bi-person-plus"></i> Get Started</div>
+                <h2 class="text-3xl font-bold text-white mb-3">Create Your Health Profile</h2>
+                <p class="text-white/40 text-sm">Setup your account once to book packages and view reports instantly.</p>
+            </div>
+
+            @if (TempData["Error"] != null) {
+                <div class="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center font-medium">
+                    <i class="bi bi-exclamation-triangle mr-1"></i> @TempData["Error"]
+                </div>
+            }
+
+            <form asp-controller="Home" asp-action="CreateProfile" method="post">
+                @Html.AntiForgeryToken()
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
+                    <div class="md:col-span-6">
+                        <label class="block text-[11px] font-bold text-white/40 mb-2 uppercase tracking-wider">First Name</label>
+                        <input type="text" name="FirstName" class="custom-input" placeholder="Enter first name" required>
+                    </div>
+                    <div class="md:col-span-6">
+                        <label class="block text-[11px] font-bold text-white/40 mb-2 uppercase tracking-wider">Last Name</label>
+                        <input type="text" name="LastName" class="custom-input" placeholder="Enter last name" required>
+                    </div>
+                    <div class="md:col-span-4">
+                        <label class="block text-[11px] font-bold text-white/40 mb-2 uppercase tracking-wider">Age</label>
+                        <input type="number" name="Age" class="custom-input" placeholder="Age" required>
+                    </div>
+                    <div class="md:col-span-4">
+                        <label class="block text-[11px] font-bold text-white/40 mb-2 uppercase tracking-wider">Gender</label>
+                        <select name="Gender" class="custom-input">
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-4">
+                        <label class="block text-[11px] font-bold text-white/40 mb-2 uppercase tracking-wider">Mobile Number</label>
+                        <input type="tel" name="Mobile" class="custom-input" placeholder="+91 XXXXX XXXXX" required>
+                    </div>
+                    <div class="md:col-span-8">
+                        <label class="block text-[11px] font-bold text-white/40 mb-2 uppercase tracking-wider">Email <span class="text-white/20 normal-case">(Optional)</span></label>
+                        <input type="email" name="Email" class="custom-input" placeholder="example@email.com">
+                    </div>
+                    <div class="md:col-span-6">
+                        <label class="block text-[11px] font-bold text-white/40 mb-2 uppercase tracking-wider">Create Password</label>
+                        <input type="password" name="Password" class="custom-input" placeholder="Create a secure password" required>
+                    </div>
+                    <div class="md:col-span-6">
+                        <label class="block text-[11px] font-bold text-white/40 mb-2 uppercase tracking-wider">City</label>
+                        <input type="text" name="City" class="custom-input" placeholder="e.g. Manipal, Udupi" required>
+                    </div>
+
+                    <div class="md:col-span-12 mt-6 text-center border-t border-white/[0.06] pt-8">
+                        <button type="submit" class="btn-primary px-12 py-4 text-[15px]">
+                            <i class="bi bi-person-check"></i> Create Account & Profile
+                        </button>
+                        <p class="text-white/25 text-xs mt-4">By creating an account, you agree to our <a href="/Home/Privacy" class="text-blue-400/60 hover:text-blue-400">Privacy Policy</a></p>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION: FAQ
+     ═══════════════════════════════════════════════════════════ -->
+<section id="faq" class="relative py-24 md:py-32 bg-[#030305] border-t border-white/[0.04]">
+    <div class="max-w-[800px] mx-auto px-6">
+        <div class="text-center mb-16">
+            <div class="section-tag"><i class="bi bi-question-circle"></i> FAQ</div>
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Frequently Asked Questions</h2>
+            <p class="text-white/45 max-w-[550px] mx-auto text-[15px] leading-relaxed">
+                Everything you need to know about booking tests and getting your reports.
+            </p>
+        </div>
+
+        <div class="flex flex-col gap-4">
+            <details class="faq-item">
+                <summary>
+                    <span>How do I book a test or health package?</span>
+                    <i class="bi bi-chevron-down faq-chevron"></i>
+                </summary>
+                <p>Create your health profile on this page, then log in to the patient portal to schedule any test or package. You can also call us or message us on WhatsApp and we'll arrange it for you.</p>
+            </details>
+            <details class="faq-item">
+                <summary>
+                    <span>Do you collect samples at home?</span>
+                    <i class="bi bi-chevron-down faq-chevron"></i>
+                </summary>
+                <p>Yes. Our trained phlebotomists collect samples at your doorstep across the Manipal and Udupi region. Just keep your home address updated in your profile when booking.</p>
+            </details>
+            <details class="faq-item">
+                <summary>
+                    <span>When and how will I get my reports?</span>
+                    <i class="bi bi-chevron-down faq-chevron"></i>
+                </summary>
+                <p>Most reports are ready within hours of sample collection. They're published as PDFs to your secure patient portal, where you can view or download them anytime.</p>
+            </details>
+            <details class="faq-item">
+                <summary>
+                    <span>How do I log in to the patient portal?</span>
+                    <i class="bi bi-chevron-down faq-chevron"></i>
+                </summary>
+                <p>Use your registered mobile number and the password you created. If you've forgotten your password, contact our staff and we'll help you reset it.</p>
+            </details>
+            <details class="faq-item">
+                <summary>
+                    <span>Is my health data secure?</span>
+                    <i class="bi bi-chevron-down faq-chevron"></i>
+                </summary>
+                <p>Yes. Your reports and personal details are accessible only through your password-protected account, and we never share your data with third parties. See our <a href="/Home/Privacy" class="text-blue-400 hover:text-blue-300">Privacy Policy</a> for details.</p>
+            </details>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION: CTA
+     ═══════════════════════════════════════════════════════════ -->
+<section class="py-24 bg-[#030305] border-t border-white/[0.04]">
+    <div class="max-w-[900px] mx-auto px-6">
+        <div class="cta-section p-10 md:p-16 text-center">
+            <div class="relative z-10">
+                <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">Ready to take control of your health?</h2>
+                <p class="text-white/45 text-sm mb-8 max-w-[500px] mx-auto">Join thousands of patients who trust KSP Care for accurate diagnostics and convenient healthcare services.</p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="/Home/UserLogin" class="btn-primary px-8 py-4">
+                        <i class="bi bi-box-arrow-in-right"></i> Patient Login
+                    </a>
+                    <a href="/Home/Contact" class="btn-ghost px-8 py-4">
+                        <i class="bi bi-telephone"></i> Contact Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════════════════ -->
+<footer class="border-t border-white/[0.06] bg-[#030305]">
+    <div class="max-w-[1200px] mx-auto px-6 py-16">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 mb-12">
+            <div class="md:col-span-1">
+                <div class="flex items-center gap-2.5 mb-4">
+                    <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                        <i class="bi bi-droplet-fill text-blue-500 text-sm"></i>
+                    </div>
+                    <span class="text-lg font-bold text-white lowercase">ksp<span class="text-blue-500">care</span></span>
+                </div>
+                <p class="text-white/35 text-sm leading-relaxed">Advanced diagnostics & pathology services for the coastal Karnataka region.</p>
+            </div>
+            <div>
+                <h4 class="text-[11px] font-bold uppercase tracking-[0.15em] text-white/30 mb-4">Quick Links</h4>
+                <div class="flex flex-col gap-2.5">
+                    <a href="/" class="text-white/50 hover:text-white text-sm transition-colors">Home</a>
+                    <a href="/Home/About" class="text-white/50 hover:text-white text-sm transition-colors">About Us</a>
+                    <a href="/Home/Contact" class="text-white/50 hover:text-white text-sm transition-colors">Contact</a>
+                    <a href="/Home/Privacy" class="text-white/50 hover:text-white text-sm transition-colors">Privacy Policy</a>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-[11px] font-bold uppercase tracking-[0.15em] text-white/30 mb-4">Services</h4>
+                <div class="flex flex-col gap-2.5">
+                    <span class="text-white/50 text-sm">Blood Tests</span>
+                    <span class="text-white/50 text-sm">Health Packages</span>
+                    <span class="text-white/50 text-sm">Home Collection</span>
+                    <span class="text-white/50 text-sm">Digital Reports</span>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-[11px] font-bold uppercase tracking-[0.15em] text-white/30 mb-4">Contact</h4>
+                <div class="flex flex-col gap-2.5">
+                    <span class="text-white/50 text-sm flex items-center gap-2"><i class="bi bi-envelope text-xs"></i> contact@kspcare.com</span>
+                    <span class="text-white/50 text-sm flex items-center gap-2"><i class="bi bi-telephone text-xs"></i> +91 98765 43210</span>
+                    <span class="text-white/50 text-sm flex items-center gap-2"><i class="bi bi-geo-alt text-xs"></i> Manipal, Karnataka</span>
+                </div>
+            </div>
+        </div>
+        <div class="border-t border-white/[0.06] pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p class="text-white/25 text-[11px] font-bold tracking-[0.15em] uppercase">&copy; 2026 kspcare. All Rights Reserved.</p>
+            <div class="flex items-center gap-6">
+                <a href="/Home/Privacy" class="text-white/25 hover:text-white/50 text-[11px] font-bold tracking-[0.1em] uppercase transition-colors">Privacy</a>
+                <a href="/Home/Contact" class="text-white/25 hover:text-white/50 text-[11px] font-bold tracking-[0.1em] uppercase transition-colors">Support</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- ═══ Package Detail Modal ═══ -->
+<div id="packageModal" class="modal-overlay">
+    <div class="modal-box" id="modalContent">
+        <button onclick="closePackageModal()" class="absolute top-5 right-5 text-white/40 hover:text-white transition-colors" aria-label="Close modal">
+            <i class="bi bi-x-lg text-xl"></i>
+        </button>
+
+        <div class="mb-6 pb-4 border-b border-white/10 pr-8">
+            <h4 id="modalTitle" class="text-2xl font-bold text-white mb-2"></h4>
+            <p id="modalDesc" class="text-white/45 text-sm m-0"></p>
+            <div id="modalPrice" class="text-blue-400 font-bold text-xl mt-3"></div>
+        </div>
+
+        <div id="modalTestList" class="space-y-3 mb-8 max-h-[40vh] overflow-y-auto pr-2"></div>
+
+        <a href="/Home/UserLogin" class="btn-primary w-full py-4 text-center block">
+            <i class="bi bi-box-arrow-in-right"></i> Login to Schedule
+        </a>
+    </div>
+</div>
+
+<script>
+    // ── Package Modal ─────────────────────────────────────────
+    const packageData = {
+        'basic': {
+            title: 'Basic Master Health',
+            price: '@Html.Raw(PkgPrice("Basic Master Health", 1499m))',
+            desc: 'A comprehensive panel of 40+ routine tests to evaluate your overall health status.',
+            tests: ['Complete Blood Count (CBC)', 'Fasting Blood Sugar (FBS)', 'Lipid Profile', 'Liver Function Test (LFT)', 'Kidney Function Test (KFT)', 'Urine Routine Examination']
+        },
+        'comprehensive': {
+            title: 'Comprehensive Body',
+            price: '@Html.Raw(PkgPrice("Comprehensive Body", 2999m))',
+            desc: 'Our most detailed screening covering 60+ parameters including hormones and advanced markers.',
+            tests: ['All tests in Basic Master Health', 'Thyroid Profile (T3, T4, TSH)', 'HbA1c (3-month blood sugar average)', 'Iron Profile', 'Vitamin D (25-OH)', 'Vitamin B12']
+        },
+        'vitamin': {
+            title: 'Vitamin Profile',
+            price: '@Html.Raw(PkgPrice("Vitamin Profile", 999m))',
+            desc: 'Targeted assessment of essential vitamins and bone health markers.',
+            tests: ['Vitamin D (25-OH)', 'Vitamin B12', 'Serum Calcium', 'Folate (Vitamin B9)']
+        },
+        'cardiac': {
+            title: 'Cardiac Care',
+            price: '@Html.Raw(PkgPrice("Cardiac Care", 1799m))',
+            desc: 'Specific markers designed to evaluate heart health and cardiovascular risk factors.',
+            tests: ['Complete Lipid Profile', 'hs-CRP (Inflammation marker)', 'Homocysteine', 'Fasting Blood Sugar (FBS)', 'HbA1c']
+        },
+        'diabetes': {
+            title: 'Diabetes Screening',
+            price: '@Html.Raw(PkgPrice("Diabetes Screening", 1299m))',
+            desc: 'Comprehensive screening to detect, monitor, and manage diabetes with key metabolic markers.',
+            tests: ['Fasting Blood Sugar (FBS)', 'Post Prandial Blood Sugar (PPBS)', 'HbA1c (Glycated Hemoglobin)', 'Fasting Insulin', 'HOMA-IR (Insulin Resistance)', 'Kidney Function Test (KFT)', 'Urine Microalbumin', 'Lipid Profile']
+        },
+        'thyroid': {
+            title: 'Thyroid Panel',
+            price: '@Html.Raw(PkgPrice("Thyroid Panel", 899m))',
+            desc: 'Complete thyroid function assessment for hypo/hyperthyroidism screening and monitoring.',
+            tests: ['T3 (Triiodothyronine)', 'T4 (Thyroxine)', 'TSH (Thyroid Stimulating Hormone)', 'Free T3', 'Free T4', 'Anti-TPO Antibodies', 'Anti-Thyroglobulin Antibodies']
+        },
+        'liver_kidney': {
+            title: 'Liver & Kidney Panel',
+            price: '@Html.Raw(PkgPrice("Liver & Kidney Panel", 1599m))',
+            desc: 'Detailed evaluation of liver and kidney function with essential organ health markers.',
+            tests: ['Liver Function Test (LFT) — SGOT, SGPT, ALP, Bilirubin, Albumin, Protein', 'Kidney Function Test (KFT) — Creatinine, BUN, Uric Acid', 'Electrolytes (Na, K, Cl)', 'GGT (Gamma-Glutamyl Transferase)', 'Urine Routine & Microscopy', 'eGFR (Estimated Glomerular Filtration Rate)']
+        },
+        'womens': {
+            title: "Women's Health",
+            price: '@Html.Raw(PkgPrice("Women's Health", 2499m))',
+            desc: 'Tailored screening package for women covering hormonal, nutritional, and metabolic health.',
+            tests: ['Complete Blood Count (CBC)', 'Iron Profile & Ferritin', 'Thyroid Profile (T3, T4, TSH)', 'Vitamin D (25-OH)', 'Vitamin B12', 'Calcium & Phosphorus', 'FSH & LH (Reproductive Hormones)', 'Prolactin', 'Lipid Profile', 'Fasting Blood Sugar']
+        }
+    };
+
+    const modal = document.getElementById('packageModal');
+    const modalContent = document.getElementById('modalContent');
+
+    function openPackageModal(key) {
+        const data = packageData[key];
+        if (!data) return;
+        document.getElementById('modalTitle').textContent = data.title;
+        document.getElementById('modalDesc').textContent = data.desc;
+        document.getElementById('modalPrice').textContent = data.price || '';
+        const list = document.getElementById('modalTestList');
+        list.innerHTML = '';
+        data.tests.forEach(t => {
+            list.innerHTML += `<div class="flex items-start gap-3 text-white/70 text-sm"><i class="bi bi-check-circle-fill text-blue-500 mt-[2px] flex-shrink-0"></i><span>${t}</span></div>`;
+        });
+        modal.classList.add('modal-show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closePackageModal() {
+        modal.classList.remove('modal-show');
+        document.body.style.overflow = '';
+    }
+
+    modal.addEventListener('click', function(e) { if (e.target === modal) closePackageModal(); });
+
+    // ── Navbar scroll ─────────────────────────────────────────
+    const heroNav = document.getElementById('heroNav');
+    if (heroNav) {
+        window.addEventListener('scroll', function() {
+            heroNav.classList.toggle('scrolled', window.scrollY > 60);
+        });
+    }
+
+    // ── Mobile menu (homepage) ────────────────────────────────
+    const heroMobileBtn = document.getElementById('heroMobileBtn');
+    const heroMobileClose = document.getElementById('heroMobileClose');
+    const heroMobileMenu = document.getElementById('heroMobileMenu');
+    const heroMobileOverlay = document.getElementById('heroMobileOverlay');
+
+    function openMobileHome() {
+        heroMobileMenu.classList.add('open');
+        heroMobileOverlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeMobileHome() {
+        heroMobileMenu.classList.remove('open');
+        heroMobileOverlay.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+    if (heroMobileBtn) heroMobileBtn.addEventListener('click', openMobileHome);
+    if (heroMobileClose) heroMobileClose.addEventListener('click', closeMobileHome);
+    if (heroMobileOverlay) heroMobileOverlay.addEventListener('click', closeMobileHome);
+
+    // ── Hero video: respect reduced motion & data saver ───────
+    const heroVideo = document.getElementById('heroVideo');
+    if (heroVideo) {
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const saveData = navigator.connection && navigator.connection.saveData;
+        if (reducedMotion || saveData) {
+            heroVideo.pause();
+            heroVideo.removeAttribute('autoplay');
+        }
+    }
+</script>

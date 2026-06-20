@@ -1,0 +1,357 @@
+@model ksp.care.Models.PatientRecord
+@{
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    ViewData["Title"] = "Book a Test";
+    var tests = ViewBag.Tests as List<ksp.care.Models.TestRecord> ?? new List<ksp.care.Models.TestRecord>();
+    var categories = tests.Select(t => t.Category).Distinct()
+        .OrderBy(c => c == "Health Package" ? 0 : 1).ThenBy(c => c).ToList();
+    var doctors = ViewBag.Doctors as List<ksp.care.Models.DoctorRecord> ?? new List<ksp.care.Models.DoctorRecord>();
+
+    // Fallback packages if no tests in DB yet
+    var fallbackPackages = new[] {
+        new { Name = "Basic Master Health", Price = 1499m, Category = "Health Packages" },
+        new { Name = "Comprehensive Body", Price = 2999m, Category = "Health Packages" },
+        new { Name = "Vitamin Profile", Price = 999m, Category = "Vitamins" },
+        new { Name = "Cardiac Care", Price = 1799m, Category = "Cardiac" },
+        new { Name = "Diabetes Screening", Price = 1299m, Category = "Diabetes" },
+        new { Name = "Thyroid Panel", Price = 899m, Category = "Thyroid" },
+        new { Name = "Liver & Kidney Panel", Price = 1599m, Category = "Organ Function" },
+        new { Name = "Women's Health", Price = 2499m, Category = "Women's Health" },
+    };
+}
+
+<style>
+    .booking-card {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 24px;
+        position: relative;
+        overflow: hidden;
+    }
+    .booking-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 20%;
+        right: 20%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(59,130,246,0.3), transparent);
+    }
+    .readonly-field {
+        background-color: rgba(255,255,255,0.03) !important;
+        border: 1px solid rgba(255,255,255,0.04) !important;
+        color: rgba(255,255,255,0.4) !important;
+        cursor: not-allowed;
+    }
+    /* Test checkbox cards */
+    .test-check-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.06);
+        background: rgba(255,255,255,0.02);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        user-select: none;
+    }
+    .test-check-item:hover {
+        background: rgba(255,255,255,0.05);
+        border-color: rgba(255,255,255,0.12);
+    }
+    .test-check-item.checked {
+        background: rgba(59,130,246,0.08);
+        border-color: rgba(59,130,246,0.3);
+    }
+    .test-check-item.checked .check-box {
+        background: #3b82f6;
+        border-color: #3b82f6;
+    }
+    .test-check-item.checked .check-box i { opacity: 1; }
+    .check-box {
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+        border: 2px solid rgba(255,255,255,0.15);
+        background: rgba(255,255,255,0.03);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.2s;
+    }
+    .check-box i { color: white; font-size: 12px; opacity: 0; transition: opacity 0.15s; }
+    /* Category accordion */
+    .cat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        padding: 10px 14px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        transition: background 0.2s;
+    }
+    .cat-header:hover { background: rgba(255,255,255,0.06); }
+    .cat-body { overflow: hidden; transition: max-height 0.4s ease; max-height: 0; }
+    .cat-body.open { max-height: 2000px; }
+    /* Sticky total bar */
+    .total-bar {
+        position: sticky;
+        bottom: 0;
+        z-index: 20;
+        background: rgba(5,5,5,0.95);
+        backdrop-filter: blur(12px);
+        border-top: 1px solid rgba(255,255,255,0.08);
+        padding: 16px 0;
+    }
+    /* Search */
+    .test-search {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: white;
+        border-radius: 12px;
+        padding: 10px 14px 10px 38px;
+        width: 100%;
+        outline: none;
+        font-size: 14px;
+        transition: border-color 0.2s;
+    }
+    .test-search:focus { border-color: rgba(59,130,246,0.5); }
+    .test-search::placeholder { color: rgba(255,255,255,0.25); }
+</style>
+
+<div class="max-w-[900px] mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                <i class="bi bi-calendar-plus text-blue-400"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-white m-0">Book Tests & Packages</h1>
+                <p class="text-white/40 text-sm m-0">Select tests below. A bill will be generated automatically.</p>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["BookingSuccess"] != null) {
+        <div class="mb-6 p-4 bg-green-500/10 border border-green-500/30 text-green-400 rounded-xl text-sm flex items-center gap-2 auto-dismiss">
+            <i class="bi bi-check-circle-fill"></i> @TempData["BookingSuccess"]
+        </div>
+    }
+    @if (TempData["Error"] != null) {
+        <div class="mb-6 p-4 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl text-sm flex items-center gap-2 auto-dismiss">
+            <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+        </div>
+    }
+
+    <form asp-action="FinalizeBooking" method="post" id="bookingForm">
+        @Html.AntiForgeryToken()
+
+        <!-- Patient Info (readonly) -->
+        <div class="booking-card p-6 md:p-8 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div>
+                    <label class="block text-[11px] font-bold text-white/40 uppercase tracking-wider mb-2">Patient ID</label>
+                    <input type="text" value="PT-@Model.Id.ToString("D4")" class="custom-input readonly-field !text-blue-400 !font-mono !font-bold" readonly>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-white/40 uppercase tracking-wider mb-2">Patient Name</label>
+                    <input type="text" value="@Model.FirstName @Model.LastName" class="custom-input readonly-field" readonly>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-white/40 uppercase tracking-wider mb-2">Mobile Number</label>
+                    <input type="text" value="@Model.Mobile" class="custom-input readonly-field" readonly>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule -->
+        <div class="booking-card p-6 md:p-8 mb-6">
+            <h4 class="text-blue-400 font-bold text-sm flex items-center gap-2 mb-5">
+                <i class="bi bi-calendar-event"></i> Schedule & Doctor
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div>
+                    <label class="block text-[11px] font-bold text-white/40 uppercase tracking-wider mb-2">Appointment Date</label>
+                    <input type="date" name="AppointmentDate" class="custom-input" required min="@DateTime.Now.ToString("yyyy-MM-dd")">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-white/40 uppercase tracking-wider mb-2">Preferred Time</label>
+                    <input type="time" name="AppointmentTime" class="custom-input" required>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-white/40 uppercase tracking-wider mb-2">Doctor <span class="text-white/20 normal-case">(Optional)</span></label>
+                    <select name="DoctorId" class="custom-input">
+                        <option value="">— No preference —</option>
+                        @foreach (var doc in doctors) {
+                            <option value="@doc.Id">Dr. @doc.Name — @doc.Specialization</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test / Package Selection -->
+        <div class="booking-card p-6 md:p-8 mb-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-5">
+                <h4 class="text-green-400 font-bold text-sm flex items-center gap-2 m-0">
+                    <i class="bi bi-check2-square"></i> Select Tests / Packages
+                </h4>
+                <div class="flex items-center gap-3">
+                    <span id="selectedCount" class="text-white/30 text-xs font-bold">0 selected</span>
+                    <button type="button" onclick="clearAll()" class="text-red-400/60 hover:text-red-400 text-xs font-bold transition-colors">Clear All</button>
+                </div>
+            </div>
+
+            <!-- Search -->
+            <div class="relative mb-5">
+                <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-white/20"></i>
+                <input type="text" id="testSearch" class="test-search" placeholder="Search tests or packages..." oninput="filterTests()">
+            </div>
+
+            <!-- Test list -->
+            <div id="testContainer" class="space-y-4">
+                @if (tests.Any()) {
+                    @foreach (var cat in categories) {
+                        var catTests = tests.Where(t => t.Category == cat).ToList();
+                        <div class="test-category" data-cat="@cat">
+                            <div class="cat-header" onclick="toggleCat(this)">
+                                <div class="flex items-center gap-2">
+                                    <i class="bi bi-folder2 text-white/30"></i>
+                                    <span class="text-white/70 text-sm font-bold">@cat</span>
+                                    <span class="text-white/20 text-xs">(@catTests.Count)</span>
+                                </div>
+                                <i class="bi bi-chevron-down text-white/30 text-xs transition-transform"></i>
+                            </div>
+                            <div class="cat-body open mt-2 space-y-2">
+                                @foreach (var t in catTests) {
+                                    <label class="test-check-item" data-name="@t.TestName.ToLower()" data-price="@t.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                                        <input type="checkbox" name="SelectedTests" value="@t.TestName" class="hidden test-cb" onchange="updateTotal()">
+                                        <div class="check-box"><i class="bi bi-check-lg"></i></div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="text-white/90 text-sm font-medium truncate">@t.TestName</div>
+                                        </div>
+                                        <div class="text-blue-400 text-sm font-bold whitespace-nowrap">₹@t.Price.ToString("N0")</div>
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    }
+                } else {
+                    <!-- Fallback packages when DB has no tests -->
+                    @foreach (var group in fallbackPackages.GroupBy(p => p.Category)) {
+                        <div class="test-category" data-cat="@group.Key">
+                            <div class="cat-header" onclick="toggleCat(this)">
+                                <div class="flex items-center gap-2">
+                                    <i class="bi bi-folder2 text-white/30"></i>
+                                    <span class="text-white/70 text-sm font-bold">@group.Key</span>
+                                    <span class="text-white/20 text-xs">(@group.Count())</span>
+                                </div>
+                                <i class="bi bi-chevron-down text-white/30 text-xs transition-transform"></i>
+                            </div>
+                            <div class="cat-body open mt-2 space-y-2">
+                                @foreach (var pkg in group) {
+                                    <label class="test-check-item" data-name="@pkg.Name.ToLower()" data-price="@pkg.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                                        <input type="checkbox" name="SelectedTests" value="@pkg.Name" class="hidden test-cb" onchange="updateTotal()">
+                                        <div class="check-box"><i class="bi bi-check-lg"></i></div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="text-white/90 text-sm font-medium truncate">@pkg.Name</div>
+                                        </div>
+                                        <div class="text-blue-400 text-sm font-bold whitespace-nowrap">₹@pkg.Price.ToString("N0")</div>
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- Sticky Total & Submit -->
+        <div class="total-bar">
+            <div class="booking-card p-5 md:p-6">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                        <div class="text-white/40 text-[10px] font-bold uppercase tracking-wider mb-1">Estimated Total</div>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-3xl font-bold text-white" id="totalAmount">₹0</span>
+                            <span class="text-white/30 text-xs" id="totalItems">0 tests</span>
+                        </div>
+                    </div>
+                    <button type="submit" id="submitBtn" disabled
+                        class="w-full sm:w-auto px-10 py-3.5 bg-blue-600 hover:bg-blue-500 disabled:bg-white/10 disabled:text-white/30 disabled:cursor-not-allowed text-white font-bold rounded-full transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] disabled:shadow-none flex items-center justify-center gap-2">
+                        <i class="bi bi-check-circle"></i> Confirm & Generate Bill
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Toggle checkbox visual state
+    document.querySelectorAll('.test-check-item').forEach(function(item) {
+        var cb = item.querySelector('.test-cb');
+        if (cb) {
+            cb.addEventListener('change', function() {
+                item.classList.toggle('checked', cb.checked);
+            });
+        }
+    });
+
+    function updateTotal() {
+        var total = 0;
+        var count = 0;
+        document.querySelectorAll('.test-cb:checked').forEach(function(cb) {
+            var item = cb.closest('.test-check-item');
+            var price = parseFloat(item.getAttribute('data-price')) || 0;
+            total += price;
+            count++;
+        });
+        document.getElementById('totalAmount').textContent = '₹' + total.toLocaleString('en-IN');
+        document.getElementById('totalItems').textContent = count + (count === 1 ? ' test' : ' tests');
+        document.getElementById('selectedCount').textContent = count + ' selected';
+        document.getElementById('submitBtn').disabled = count === 0;
+    }
+
+    function clearAll() {
+        document.querySelectorAll('.test-cb:checked').forEach(function(cb) {
+            cb.checked = false;
+            cb.closest('.test-check-item').classList.remove('checked');
+        });
+        updateTotal();
+    }
+
+    function toggleCat(header) {
+        var body = header.nextElementSibling;
+        body.classList.toggle('open');
+        var icon = header.querySelector('.bi-chevron-down');
+        if (icon) icon.style.transform = body.classList.contains('open') ? '' : 'rotate(-90deg)';
+    }
+
+    function filterTests() {
+        var q = document.getElementById('testSearch').value.toLowerCase();
+        document.querySelectorAll('.test-check-item').forEach(function(item) {
+            var name = item.getAttribute('data-name') || '';
+            item.style.display = name.includes(q) ? '' : 'none';
+        });
+        // Show/hide categories with no visible items
+        document.querySelectorAll('.test-category').forEach(function(cat) {
+            var visible = cat.querySelectorAll('.test-check-item:not([style*="display: none"])').length;
+            cat.style.display = visible > 0 ? '' : 'none';
+        });
+    }
+
+    // Validate at least 1 test selected on submit
+    document.getElementById('bookingForm').addEventListener('submit', function(e) {
+        var count = document.querySelectorAll('.test-cb:checked').length;
+        if (count === 0) {
+            e.preventDefault();
+            alert('Please select at least one test or package.');
+        }
+    });
+</script>

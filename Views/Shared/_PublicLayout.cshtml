@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="@(ViewData["MetaDescription"] ?? "KSP Care — Trusted diagnostics and pathology services in Manipal & Udupi.")" />
+    <meta name="theme-color" content="#030305" />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="KSP Care" />
+    <meta property="og:title" content="@(ViewData["Title"] != null ? ViewData["Title"] + " — KSP Care" : "KSP Care — Diagnostics & Pathology Manipal")" />
+    <meta property="og:description" content="@(ViewData["MetaDescription"] ?? "KSP Care — Trusted diagnostics and pathology services in Manipal & Udupi.")" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="@(ViewData["Title"] != null ? ViewData["Title"] + " — KSP Care" : "KSP Care")" />
+    <meta name="twitter:description" content="@(ViewData["MetaDescription"] ?? "KSP Care — Trusted diagnostics and pathology services in Manipal & Udupi.")" />
+    <title>@ViewData["Title"] — KSP Care</title>
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+    <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/tailwind.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" />
+    <style>
+        /* Public layout specific overrides */
+        .pub-nav-link {
+            position: relative;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 6px 0;
+            transition: color 0.2s ease;
+        }
+        .pub-nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--accent-blue);
+            border-radius: 1px;
+            transition: all 0.25s ease;
+            transform: translateX(-50%);
+        }
+        .pub-nav-link:hover::after,
+        .pub-nav-link.active::after { width: 100%; }
+        .pub-nav-link.active { color: white; }
+        .pub-nav-link:not(.active) { color: rgba(255,255,255,0.5); }
+        .pub-nav-link:hover { color: white; }
+
+        /* Mobile menu */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 280px;
+            height: 100vh;
+            background: #0a0a0e;
+            border-left: 1px solid var(--border-subtle);
+            z-index: 200;
+            transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 80px 32px 32px;
+        }
+        .mobile-menu.open { right: 0; }
+        .mobile-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 199;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        .mobile-overlay.open { opacity: 1; visibility: visible; }
+    </style>
+    @RenderSection("Styles", required: false)
+</head>
+<body class="antialiased flex flex-col min-h-screen">
+
+    @{
+        var currentAction = ViewContext.RouteData.Values["Action"]?.ToString() ?? "";
+    }
+
+    <!-- ═══ Public Navbar ═══ -->
+    <nav class="w-full flex items-center justify-between px-6 md:px-12 lg:px-16 py-4 border-b border-white/[0.06] bg-[#030305]/80 backdrop-blur-xl sticky top-0 z-50" id="mainNav">
+        <a href="/" class="flex items-center gap-2.5 no-underline group" aria-label="KSP Care Home">
+            <div class="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
+                <i class="bi bi-droplet-fill text-blue-500 text-lg"></i>
+            </div>
+            <span class="text-xl font-bold text-white lowercase">ksp<span class="text-blue-500">care</span></span>
+        </a>
+
+        <div class="hidden md:flex items-center gap-8">
+            <a href="/" class="pub-nav-link @(currentAction == "Index" ? "active" : "")">Home</a>
+            <a href="/Home/About" class="pub-nav-link @(currentAction == "About" ? "active" : "")">About</a>
+            <a href="/Home/Contact" class="pub-nav-link @(currentAction == "Contact" ? "active" : "")">Contact</a>
+            <a href="/Home/Privacy" class="pub-nav-link @(currentAction == "Privacy" ? "active" : "")">Privacy</a>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <a href="/Home/AdminLogin" class="btn-wrapper hidden sm:inline-flex"><div class="btn-inner-nav">Staff Login</div></a>
+            <a href="/Home/UserLogin" class="btn-wrapper"><div class="btn-inner-cta">Patient Login</div></a>
+            <!-- Mobile hamburger -->
+            <button id="mobileMenuBtn" class="md:hidden w-10 h-10 flex items-center justify-center text-white/60 hover:text-white transition-colors" aria-label="Open menu">
+                <i class="bi bi-list text-2xl"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+    <div class="mobile-menu" id="mobileMenu">
+        <button id="mobileCloseBtn" class="absolute top-6 right-6 text-white/50 hover:text-white text-2xl transition-colors" aria-label="Close menu">
+            <i class="bi bi-x-lg"></i>
+        </button>
+        <div class="flex flex-col gap-2">
+            <a href="/" class="flex items-center gap-3 py-3 px-4 rounded-xl text-sm font-medium @(currentAction == "Index" ? "text-white bg-white/5" : "text-white/60 hover:text-white hover:bg-white/5") transition-all">
+                <i class="bi bi-house text-lg"></i> Home
+            </a>
+            <a href="/Home/About" class="flex items-center gap-3 py-3 px-4 rounded-xl text-sm font-medium @(currentAction == "About" ? "text-white bg-white/5" : "text-white/60 hover:text-white hover:bg-white/5") transition-all">
+                <i class="bi bi-info-circle text-lg"></i> About Us
+            </a>
+            <a href="/Home/Contact" class="flex items-center gap-3 py-3 px-4 rounded-xl text-sm font-medium @(currentAction == "Contact" ? "text-white bg-white/5" : "text-white/60 hover:text-white hover:bg-white/5") transition-all">
+                <i class="bi bi-telephone text-lg"></i> Contact
+            </a>
+            <a href="/Home/Privacy" class="flex items-center gap-3 py-3 px-4 rounded-xl text-sm font-medium @(currentAction == "Privacy" ? "text-white bg-white/5" : "text-white/60 hover:text-white hover:bg-white/5") transition-all">
+                <i class="bi bi-shield-lock text-lg"></i> Privacy
+            </a>
+            <hr class="border-white/10 my-4" />
+            <a href="/Home/AdminLogin" class="flex items-center gap-3 py-3 px-4 rounded-xl text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all">
+                <i class="bi bi-person-badge text-lg"></i> Staff Login
+            </a>
+            <a href="/Home/UserLogin" class="flex items-center gap-3 py-3 px-4 rounded-xl text-sm font-medium text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 transition-all">
+                <i class="bi bi-person text-lg"></i> Patient Login
+            </a>
+        </div>
+    </div>
+
+    <!-- ═══ Main Content ═══ -->
+    <main class="flex-grow container-narrow py-16 md:py-20">
+        @RenderBody()
+    </main>
+
+    <!-- ═══ Footer ═══ -->
+    <footer class="border-t border-white/[0.06] bg-[#030305]">
+        <div class="container-wide py-16">
+            <!-- Top row -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 mb-12">
+                <!-- Brand -->
+                <div class="md:col-span-1">
+                    <div class="flex items-center gap-2.5 mb-4">
+                        <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                            <i class="bi bi-droplet-fill text-blue-500 text-sm"></i>
+                        </div>
+                        <span class="text-lg font-bold text-white lowercase">ksp<span class="text-blue-500">care</span></span>
+                    </div>
+                    <p class="text-white/35 text-sm leading-relaxed">Advanced diagnostics & pathology services for Manipal and Udupi regions.</p>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="text-[11px] font-bold uppercase tracking-[0.15em] text-white/30 mb-4">Quick Links</h4>
+                    <div class="flex flex-col gap-2.5">
+                        <a href="/" class="text-white/50 hover:text-white text-sm transition-colors">Home</a>
+                        <a href="/Home/About" class="text-white/50 hover:text-white text-sm transition-colors">About Us</a>
+                        <a href="/Home/Contact" class="text-white/50 hover:text-white text-sm transition-colors">Contact</a>
+                        <a href="/Home/Privacy" class="text-white/50 hover:text-white text-sm transition-colors">Privacy Policy</a>
+                    </div>
+                </div>
+
+                <!-- Services -->
+                <div>
+                    <h4 class="text-[11px] font-bold uppercase tracking-[0.15em] text-white/30 mb-4">Services</h4>
+                    <div class="flex flex-col gap-2.5">
+                        <span class="text-white/50 text-sm">Blood Tests</span>
+                        <span class="text-white/50 text-sm">Health Packages</span>
+                        <span class="text-white/50 text-sm">Home Collection</span>
+                        <span class="text-white/50 text-sm">Digital Reports</span>
+                    </div>
+                </div>
+
+                <!-- Contact -->
+                <div>
+                    <h4 class="text-[11px] font-bold uppercase tracking-[0.15em] text-white/30 mb-4">Contact</h4>
+                    <div class="flex flex-col gap-2.5">
+                        <span class="text-white/50 text-sm flex items-center gap-2"><i class="bi bi-envelope text-xs"></i> contact@kspcare.com</span>
+                        <span class="text-white/50 text-sm flex items-center gap-2"><i class="bi bi-telephone text-xs"></i> +91 98765 43210</span>
+                        <span class="text-white/50 text-sm flex items-center gap-2"><i class="bi bi-geo-alt text-xs"></i> Manipal, Karnataka</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom bar -->
+            <div class="border-t border-white/[0.06] pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+                <p class="text-white/25 text-[11px] font-bold tracking-[0.15em] uppercase">
+                    &copy; 2026 kspcare. All Rights Reserved.
+                </p>
+                <div class="flex items-center gap-6">
+                    <a href="/Home/Privacy" class="text-white/25 hover:text-white/50 text-[11px] font-bold tracking-[0.1em] uppercase transition-colors">Privacy</a>
+                    <a href="/Home/Contact" class="text-white/25 hover:text-white/50 text-[11px] font-bold tracking-[0.1em] uppercase transition-colors">Support</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scroll to Top Button -->
+    <button id="scrollTopBtn" aria-label="Scroll to top"
+        class="fixed bottom-6 right-6 w-11 h-11 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all duration-300 opacity-0 pointer-events-none z-50">
+        <i class="bi bi-arrow-up-short text-xl"></i>
+    </button>
+
+    <script>
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileOverlay = document.getElementById('mobileOverlay');
+
+        function openMobileMenu() {
+            mobileMenu.classList.add('open');
+            mobileOverlay.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('open');
+            mobileOverlay.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', openMobileMenu);
+        if (mobileCloseBtn) mobileCloseBtn.addEventListener('click', closeMobileMenu);
+        if (mobileOverlay) mobileOverlay.addEventListener('click', closeMobileMenu);
+
+        // Navbar blur on scroll
+        const nav = document.getElementById('mainNav');
+        if (nav) {
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 40) {
+                    nav.style.borderBottomColor = 'rgba(255,255,255,0.1)';
+                    nav.style.backgroundColor = 'rgba(3,3,5,0.95)';
+                } else {
+                    nav.style.borderBottomColor = 'rgba(255,255,255,0.06)';
+                    nav.style.backgroundColor = 'rgba(3,3,5,0.8)';
+                }
+            });
+        }
+
+        // Scroll to top button
+        const scrollTopBtn = document.getElementById('scrollTopBtn');
+        if (scrollTopBtn) {
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 300) {
+                    scrollTopBtn.style.opacity = '1';
+                    scrollTopBtn.style.pointerEvents = 'auto';
+                } else {
+                    scrollTopBtn.style.opacity = '0';
+                    scrollTopBtn.style.pointerEvents = 'none';
+                }
+            });
+            scrollTopBtn.addEventListener('click', function() {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+    </script>
+    <script src="~/js/site.js"></script>
+</body>
+</html>

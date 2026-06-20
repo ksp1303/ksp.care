@@ -1,0 +1,100 @@
+@model ksp.care.Models.PatientRecord
+@{
+    ViewData["Title"] = "Edit Patient";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="max-w-3xl mx-auto">
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-white m-0">Edit Patient</h2>
+            <p class="text-white/50 text-sm m-0">Update information for @Model.FirstName @Model.LastName</p>
+        </div>
+        <a href="/Admin/Patient" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm font-bold rounded-lg transition-colors no-underline">
+            <i class="bi bi-arrow-left mr-2"></i> Back to List
+        </a>
+    </div>
+
+    <div class="glass-panel rounded-[24px] border border-white/10 bg-white/[0.02] p-8">
+        <form method="post" action="/Admin/EditPatient">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="Id" value="@Model.Id" />
+            
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                <!-- Personal Info -->
+                <div class="space-y-4">
+                    <h3 class="text-white/80 font-bold text-sm uppercase tracking-wider mb-4 pb-2 border-b border-white/10">Personal Details</h3>
+                    
+                    <div>
+                        <label class="text-white/50 text-xs font-bold uppercase tracking-wider mb-2 block">First Name</label>
+                        <input type="text" name="FirstName" value="@Model.FirstName" required class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 outline-none focus:border-blue-500/50" />
+                    </div>
+                    <div>
+                        <label class="text-white/50 text-xs font-bold uppercase tracking-wider mb-2 block">Last Name</label>
+                        <input type="text" name="LastName" value="@Model.LastName" required class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 outline-none focus:border-blue-500/50" />
+                    </div>
+                    <div>
+                        <label class="text-white/50 text-xs font-bold uppercase tracking-wider mb-2 block">Mobile (Login ID)</label>
+                        <input type="tel" name="Mobile" value="@Model.Mobile" required class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 outline-none focus:border-blue-500/50" />
+                    </div>
+                    <div>
+                        <label class="text-white/50 text-xs font-bold uppercase tracking-wider mb-2 block">Email</label>
+                        <input type="email" name="Email" value="@Model.Email" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 outline-none focus:border-blue-500/50" placeholder="patient@email.com" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-white/50 text-xs font-bold uppercase tracking-wider mb-2 block">Age</label>
+                            <input type="number" name="Age" value="@Model.Age" required min="0" max="150" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 outline-none focus:border-blue-500/50" />
+                        </div>
+                        <div>
+                            <label class="text-white/50 text-xs font-bold uppercase tracking-wider mb-2 block">Gender</label>
+                            <select name="Gender" required class="w-full bg-[#1a1a1a] border border-white/10 text-white rounded-xl px-4 py-3 outline-none focus:border-blue-500/50 appearance-none">
+                                <option value="Male" selected="@(Model.Gender == "Male" ? "selected" : null)">Male</option>
+                                <option value="Female" selected="@(Model.Gender == "Female" ? "selected" : null)">Female</option>
+                                <option value="Other" selected="@(Model.Gender == "Other" ? "selected" : null)">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address & Security -->
+                <div class="space-y-4">
+                    <h3 class="text-white/80 font-bold text-sm uppercase tracking-wider mb-4 pb-2 border-b border-white/10">Address & Security</h3>
+                    
+                    <div>
+                        <label class="text-white/50 text-xs font-bold uppercase tracking-wider mb-2 block">Ward / Area</label>
+                        <input type="text" name="Ward" value="@Model.Ward" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 outline-none focus:border-blue-500/50" />
+                    </div>
+                    <div>
+                        <label class="text-white/50 text-xs font-bold uppercase tracking-wider mb-2 block">City</label>
+                        <input type="text" name="City" value="@Model.City" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 outline-none focus:border-blue-500/50" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-white/50 text-xs font-bold uppercase tracking-wider mb-2 block">State</label>
+                            <input type="text" name="State" value="@Model.State" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 outline-none focus:border-blue-500/50" />
+                        </div>
+                        <div>
+                            <label class="text-white/50 text-xs font-bold uppercase tracking-wider mb-2 block">Pincode</label>
+                            <input type="text" name="Pincode" value="@Model.Pincode" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 outline-none focus:border-blue-500/50" />
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <label class="text-white/50 text-xs font-bold uppercase tracking-wider mb-2 block">New Password <span class="text-white/30 normal-case font-normal">(Leave blank to keep current)</span></label>
+                        <input type="password" name="Password" placeholder="••••••••" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 outline-none focus:border-blue-500/50" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-white/10 flex justify-end gap-4">
+                <a href="/Admin/Patient" class="px-6 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-colors no-underline">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-colors">
+                    <i class="bi bi-save mr-2"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

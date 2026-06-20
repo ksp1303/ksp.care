@@ -1,0 +1,84 @@
+@model IEnumerable<ksp.care.Models.ContactMessage>
+@{
+    ViewData["Title"] = "Contact Messages";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var unread = Model.Count(m => !m.IsRead);
+}
+
+<div class="mb-6 flex items-center justify-between flex-wrap gap-4">
+    <div>
+        <h1 class="text-2xl font-bold text-white mb-1 flex items-center gap-3">
+            <i class="bi bi-envelope text-blue-400"></i> Contact Messages
+            @if (unread > 0) {
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">@unread unread</span>
+            }
+        </h1>
+        <p class="text-white/40 text-sm m-0">Messages submitted via the public Contact page.</p>
+    </div>
+</div>
+
+@if (TempData["Success"] != null) {
+    <div class="mb-6 p-4 bg-green-500/10 border border-green-500/20 text-green-400 rounded-xl text-sm flex items-center gap-2 auto-dismiss">
+        <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+    </div>
+}
+
+@if (!Model.Any()) {
+    <div class="glass-panel rounded-[24px] border border-white/10 p-16 text-center">
+        <div class="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mx-auto mb-4">
+            <i class="bi bi-envelope-open text-blue-400 text-3xl"></i>
+        </div>
+        <h3 class="text-white font-bold text-lg mb-2">No messages yet</h3>
+        <p class="text-white/40 text-sm">Contact form submissions will appear here.</p>
+    </div>
+} else {
+    <div class="space-y-4">
+        @foreach (var msg in Model) {
+            <div class="glass-panel rounded-[20px] border @(msg.IsRead ? "border-white/8 bg-white/[0.01]" : "border-blue-500/20 bg-blue-500/[0.02]") p-6 transition-all">
+                <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-lg flex-shrink-0">
+                            @(msg.Name.Length > 0 ? msg.Name[0].ToString().ToUpper() : "?")
+                        </div>
+                        <div>
+                            <div class="text-white font-bold text-sm flex items-center gap-2">
+                                @msg.Name
+                                @if (!msg.IsRead) {
+                                    <span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span>
+                                }
+                            </div>
+                            <div class="text-white/40 text-xs flex items-center gap-2 mt-0.5">
+                                <i class="bi bi-telephone text-[10px]"></i> @msg.Phone
+                                <span class="text-white/20">·</span>
+                                <i class="bi bi-calendar3 text-[10px]"></i> @msg.CreatedAt.ToString("dd MMM yyyy, h:mm tt")
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        @if (!msg.IsRead) {
+                            <form asp-action="MarkMessageRead" method="post" class="inline m-0">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@msg.Id" />
+                                <button type="submit" class="px-3 py-1.5 bg-green-500/10 hover:bg-green-500/20 text-green-400 text-xs font-bold rounded-lg transition-colors border border-green-500/20">
+                                    <i class="bi bi-check2"></i> Mark Read
+                                </button>
+                            </form>
+                        }
+                        <form asp-action="DeleteMessage" method="post" class="inline m-0">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@msg.Id" />
+                            <button type="submit"
+                                class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold rounded-lg transition-colors border border-red-500/20"
+                                onclick="return confirm('Delete this message?')">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="p-4 rounded-xl bg-white/5 border border-white/8">
+                    <p class="text-white/80 text-sm leading-relaxed m-0 whitespace-pre-wrap">@msg.Message</p>
+                </div>
+            </div>
+        }
+    </div>
+}

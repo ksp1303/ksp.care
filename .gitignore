@@ -1,0 +1,32 @@
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS Code / Rider
+.vs/
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+Thumbs.db
+
+# Secrets (don't push these!)
+appsettings.Development.json
+
+# NuGet
+*.nupkg
+packages/
+
+# Node
+node_modules/
+
+# Misc
+*.swp
+*.log

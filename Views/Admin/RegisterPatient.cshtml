@@ -1,0 +1,142 @@
+@{
+    ViewData["Title"] = "Register New Patient";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var doctors = ViewBag.Doctors as List<ksp.care.Models.DoctorRecord> ?? new List<ksp.care.Models.DoctorRecord>();
+}
+
+@if (TempData["Success"] != null) {
+    <div class="mb-6 p-4 bg-green-500/10 border border-green-500/30 text-green-400 rounded-xl text-sm font-medium flex items-center gap-2">
+        <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+    </div>
+}
+@if (TempData["Error"] != null) {
+    <div class="mb-6 p-4 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl text-sm font-medium flex items-center gap-2">
+        <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+    </div>
+}
+
+<div class="mb-8">
+    <h2 class="text-3xl font-bold text-white flex items-center gap-3">
+        <i class="bi bi-person-plus text-blue-400"></i> Register New Patient
+    </h2>
+    <p class="text-white/50 text-sm mt-1">Add a new patient to the system.</p>
+</div>
+
+<div class="glass-panel p-6 rounded-[24px] border border-white/10 bg-white/[0.02]">
+    <form asp-action="RegisterPatient" method="post" class="space-y-6">
+        @Html.AntiForgeryToken()
+
+        <!-- Quick Search (Mockup) -->
+        <div class="flex items-center gap-2 border border-white/10 bg-white/5 p-2 rounded-xl mb-6">
+            <input type="text" placeholder="Search By Patient Mobile Number or Name" class="bg-transparent border-none text-white text-sm outline-none w-full px-3" />
+            <button type="button" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"><i class="bi bi-arrow-counterclockwise"></i></button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="space-y-2">
+                <label class="text-[11px] font-bold text-white/50 uppercase tracking-wider">Patient ID</label>
+                <input type="text" value="PT-@(((int)ViewBag.NextPatientId).ToString("D4"))" readonly class="w-full bg-white/5 border border-white/10 text-white/50 rounded-lg px-4 py-2.5 outline-none font-mono text-blue-400 font-bold" />
+            </div>
+            
+            <div class="space-y-2">
+                <label class="text-[11px] font-bold text-white/50 uppercase tracking-wider">Designation</label>
+                <select name="designation" class="w-full bg-[#0a0a0a] border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500/50">
+                    <option value="">Select</option>
+                    <option value="Mr.">Mr.</option>
+                    <option value="Mrs.">Mrs.</option>
+                    <option value="Ms.">Ms.</option>
+                    <option value="Baby">Baby</option>
+                    <option value="Master">Master</option>
+                </select>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[11px] font-bold text-white/50 uppercase tracking-wider">First Name <span class="text-red-500">*</span></label>
+                <input type="text" name="firstName" required class="w-full bg-[#0a0a0a] border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500/50" />
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[11px] font-bold text-white/50 uppercase tracking-wider">Last Name</label>
+                <input type="text" name="lastName" class="w-full bg-[#0a0a0a] border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500/50" />
+            </div>
+            
+            <div class="space-y-2">
+                <label class="text-[11px] font-bold text-white/50 uppercase tracking-wider">Phone Number <span class="text-red-500">*</span></label>
+                <input type="text" name="mobile" required class="w-full bg-[#0a0a0a] border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500/50" />
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[11px] font-bold text-white/50 uppercase tracking-wider block">Gender <span class="text-red-500">*</span></label>
+                <div class="flex items-center gap-4 mt-2">
+                    <label class="flex items-center gap-2 cursor-pointer text-sm text-white/80"><input type="radio" name="gender" value="Male" required class="accent-blue-500" /> Male</label>
+                    <label class="flex items-center gap-2 cursor-pointer text-sm text-white/80"><input type="radio" name="gender" value="Female" required class="accent-pink-500" /> Female</label>
+                    <label class="flex items-center gap-2 cursor-pointer text-sm text-white/80"><input type="radio" name="gender" value="Other" required class="accent-purple-500" /> Other</label>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[11px] font-bold text-white/50 uppercase tracking-wider">Age <span class="text-red-500">*</span></label>
+                <input type="number" name="age" required class="w-full bg-[#0a0a0a] border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500/50" />
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[11px] font-bold text-white/50 uppercase tracking-wider">Age Type</label>
+                <select name="ageType" class="w-full bg-[#0a0a0a] border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500/50">
+                    <option value="Years">Years</option>
+                    <option value="Months">Months</option>
+                    <option value="Days">Days</option>
+                </select>
+            </div>
+
+            <div class="space-y-2 md:col-span-2">
+                <label class="text-[11px] font-bold text-white/50 uppercase tracking-wider">Email</label>
+                <input type="email" name="email" class="w-full bg-[#0a0a0a] border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500/50" />
+            </div>
+
+            <div class="space-y-2 md:col-span-2">
+                <label class="text-[11px] font-bold text-white/50 uppercase tracking-wider">Address</label>
+                <textarea name="address" rows="2" class="w-full bg-[#0a0a0a] border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500/50"></textarea>
+            </div>
+            
+            <div class="space-y-2">
+                <label class="text-[11px] font-bold text-white/50 uppercase tracking-wider">Doctor</label>
+                <div class="flex gap-2">
+                    <select name="doctorId" class="flex-1 bg-[#0a0a0a] border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500/50">
+                        <option value="">Select</option>
+                        @foreach(var doc in doctors) {
+                            <option value="@doc.Id">@doc.Name</option>
+                        }
+                    </select>
+                    <button type="button" class="px-3 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg border border-white/10 transition-colors"><i class="bi bi-plus"></i></button>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[11px] font-bold text-white/50 uppercase tracking-wider">Hospital</label>
+                <div class="flex gap-2">
+                    <select name="hospital" class="flex-1 bg-[#0a0a0a] border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500/50">
+                        <option value="">Select</option>
+                        <option value="Main Branch">Main Branch</option>
+                    </select>
+                    <button type="button" class="px-3 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg border border-white/10 transition-colors"><i class="bi bi-plus"></i></button>
+                </div>
+            </div>
+
+            <div class="space-y-2 md:col-span-2 flex items-end justify-between gap-4">
+                <div class="space-y-2 flex-1">
+                    <label class="text-[11px] font-bold text-white/50 uppercase tracking-wider">Laboratory</label>
+                    <div class="flex gap-2">
+                        <select name="laboratory" class="flex-1 bg-[#0a0a0a] border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500/50">
+                            <option value="">Select</option>
+                            <option value="Central Lab">Central Lab</option>
+                        </select>
+                        <button type="button" class="px-3 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg border border-white/10 transition-colors"><i class="bi bi-plus"></i></button>
+                    </div>
+                </div>
+                <button type="submit" class="px-8 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition-colors">
+                    Go To Billing <i class="bi bi-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>

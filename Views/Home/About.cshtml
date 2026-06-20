@@ -1,0 +1,190 @@
+@{
+    Layout = "~/Views/Shared/_PublicLayout.cshtml";
+    ViewData["Title"] = "About Us";
+    ViewData["MetaDescription"] = "Learn about KSP Care — our mission, values, and commitment to quality diagnostics in Manipal & Udupi.";
+}
+
+<style>
+    .timeline-line {
+        position: absolute;
+        left: 24px;
+        top: 56px;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(180deg, rgba(59,130,246,0.3), rgba(139,92,246,0.3), transparent);
+    }
+    .timeline-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid;
+        background: #030305;
+        position: relative;
+        z-index: 2;
+        flex-shrink: 0;
+    }
+    .value-card {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 20px;
+        padding: 32px;
+        transition: all 0.35s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .value-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(59,130,246,0.3), transparent);
+        opacity: 0;
+        transition: opacity 0.35s;
+    }
+    .value-card:hover {
+        background: rgba(255,255,255,0.04);
+        border-color: rgba(255,255,255,0.12);
+        transform: translateY(-4px);
+    }
+    .value-card:hover::before { opacity: 1; }
+    .value-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        transition: transform 0.3s;
+    }
+    .value-card:hover .value-icon { transform: scale(1.1); }
+    .cert-badge {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: all 0.3s;
+    }
+    .cert-badge:hover {
+        background: rgba(255,255,255,0.05);
+        border-color: rgba(255,255,255,0.15);
+        transform: translateY(-2px);
+    }
+</style>
+
+<!-- Hero Section -->
+<div class="text-center mb-20 anim-fade-up">
+    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/8 border border-blue-500/15 mb-6">
+        <i class="bi bi-info-circle text-blue-400 text-xs"></i>
+        <span class="text-[11px] font-bold text-blue-400/80 uppercase tracking-[0.15em]">About Us</span>
+    </div>
+    <h1 class="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+        Quality Healthcare<br><span class="text-gradient-blue">At Your Doorstep</span>
+    </h1>
+    <p class="text-white/45 text-lg max-w-[600px] mx-auto leading-relaxed">
+        KSP Care is a modern diagnostic and healthcare service bringing lab tests, health checkups, and expert consultations right to your home in Manipal & Udupi.
+    </p>
+</div>
+
+<!-- Values Grid -->
+<div class="grid md:grid-cols-3 gap-6 mb-20">
+    <div class="value-card anim-fade-up-delay-1">
+        <div class="value-icon bg-blue-500/10 border border-blue-500/20">
+            <i class="bi bi-house-heart text-blue-400 text-2xl"></i>
+        </div>
+        <h3 class="text-white font-bold text-lg mb-3">Home Collection</h3>
+        <p class="text-white/40 text-sm leading-relaxed m-0">Our trained phlebotomists visit your home for sample collection, ensuring maximum comfort and clinical precision at your doorstep.</p>
+    </div>
+    <div class="value-card anim-fade-up-delay-2">
+        <div class="value-icon bg-green-500/10 border border-green-500/20">
+            <i class="bi bi-shield-check text-green-400 text-2xl"></i>
+        </div>
+        <h3 class="text-white font-bold text-lg mb-3">Trusted Reports</h3>
+        <p class="text-white/40 text-sm leading-relaxed m-0">NABL-standard processes ensure accurate and reliable diagnostic reports delivered digitally through our secure patient portal.</p>
+    </div>
+    <div class="value-card anim-fade-up-delay-3">
+        <div class="value-icon bg-purple-500/10 border border-purple-500/20">
+            <i class="bi bi-people text-purple-400 text-2xl"></i>
+        </div>
+        <h3 class="text-white font-bold text-lg mb-3">Expert Doctors</h3>
+        <p class="text-white/40 text-sm leading-relaxed m-0">Consult with experienced healthcare professionals who carefully review your results and provide personalized care guidance.</p>
+    </div>
+</div>
+
+<!-- Mission Section -->
+<div class="relative mb-20">
+    <div class="glass-panel-elevated rounded-[24px] p-10 md:p-14 text-center relative overflow-hidden">
+        <div class="absolute top-0 left-20% right-20% h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent"></div>
+        <div class="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mx-auto mb-6">
+            <i class="bi bi-bullseye text-blue-400 text-2xl"></i>
+        </div>
+        <h2 class="text-2xl md:text-3xl font-bold text-white mb-5">Our Mission</h2>
+        <p class="text-white/50 text-base max-w-[700px] mx-auto mb-0 leading-relaxed">
+            To make quality healthcare accessible and affordable for everyone. We believe no one should have to travel far for basic diagnostics. Through technology and home-based services, we aim to serve every household with care, accuracy, and trust — building a healthier community one test at a time.
+        </p>
+    </div>
+</div>
+
+<!-- Timeline -->
+<div class="mb-20">
+    <h2 class="text-2xl font-bold text-white mb-10 text-center">Our Journey</h2>
+    <div class="max-w-[600px] mx-auto">
+        <div class="relative">
+            <div class="timeline-line"></div>
+            <div class="flex gap-5 mb-10">
+                <div class="flex flex-col items-center pt-1">
+                    <div class="timeline-dot border-blue-500"></div>
+                </div>
+                <div class="pb-2">
+                    <span class="text-[11px] font-bold text-blue-400/60 uppercase tracking-widest">2023</span>
+                    <h4 class="text-white font-bold text-base mt-1 mb-1">Foundation</h4>
+                    <p class="text-white/40 text-sm m-0 leading-relaxed">KSP Care was founded with a vision to revolutionize diagnostic services in the coastal Karnataka region.</p>
+                </div>
+            </div>
+            <div class="flex gap-5 mb-10">
+                <div class="flex flex-col items-center pt-1">
+                    <div class="timeline-dot border-green-500"></div>
+                </div>
+                <div class="pb-2">
+                    <span class="text-[11px] font-bold text-green-400/60 uppercase tracking-widest">2025</span>
+                    <h4 class="text-white font-bold text-base mt-1 mb-1">LIMS Platform Launch</h4>
+                    <p class="text-white/40 text-sm m-0 leading-relaxed">Launched our proprietary Laboratory Information Management System, enabling digital reports and seamless workflows.</p>
+                </div>
+            </div>
+            <div class="flex gap-5">
+                <div class="flex flex-col items-center pt-1">
+                    <div class="timeline-dot border-purple-500"></div>
+                </div>
+                <div class="pb-2">
+                    <span class="text-[11px] font-bold text-purple-400/60 uppercase tracking-widest">2026 — Present</span>
+                    <h4 class="text-white font-bold text-base mt-1 mb-1">Expanding Reach</h4>
+                    <p class="text-white/40 text-sm m-0 leading-relaxed">Serving 1,500+ patients daily with home collection services across Manipal, Udupi, and surrounding areas.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Certifications -->
+<div class="text-center">
+    <h2 class="text-xl font-bold text-white mb-8">Certifications & Standards</h2>
+    <div class="flex flex-wrap items-center justify-center gap-4">
+        <div class="cert-badge">
+            <i class="bi bi-patch-check-fill text-blue-500 text-2xl"></i>
+            <span class="text-white/70 font-bold text-sm">NABL Accredited</span>
+        </div>
+        <div class="cert-badge">
+            <i class="bi bi-shield-check text-green-500 text-2xl"></i>
+            <span class="text-white/70 font-bold text-sm">ISO 9001:2015</span>
+        </div>
+        <div class="cert-badge">
+            <i class="bi bi-award text-amber-500 text-2xl"></i>
+            <span class="text-white/70 font-bold text-sm">ICMR Approved</span>
+        </div>
+    </div>
+</div>

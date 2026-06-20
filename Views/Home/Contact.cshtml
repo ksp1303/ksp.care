@@ -1,0 +1,163 @@
+@{
+    Layout = "~/Views/Shared/_PublicLayout.cshtml";
+    ViewData["Title"] = "Contact Us";
+    ViewData["MetaDescription"] = "Get in touch with KSP Care. Reach us for diagnostics queries, home collection booking, or support.";
+}
+
+<style>
+    .contact-card {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 16px;
+        padding: 24px;
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        transition: all 0.3s ease;
+    }
+    .contact-card:hover {
+        background: rgba(255,255,255,0.04);
+        border-color: rgba(255,255,255,0.12);
+        transform: translateY(-2px);
+    }
+    .contact-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: transform 0.3s;
+    }
+    .contact-card:hover .contact-icon { transform: scale(1.1); }
+    .form-card {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 24px;
+        padding: 32px;
+        position: relative;
+        overflow: hidden;
+    }
+    .form-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 20%;
+        right: 20%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(59,130,246,0.3), transparent);
+    }
+    .map-wrapper {
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.06);
+        height: 280px;
+    }
+    .map-wrapper iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        filter: invert(90%) hue-rotate(180deg) brightness(0.8) contrast(1.2);
+    }
+</style>
+
+<!-- Hero -->
+<div class="text-center mb-16 anim-fade-up">
+    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/8 border border-blue-500/15 mb-6">
+        <i class="bi bi-telephone text-blue-400 text-xs"></i>
+        <span class="text-[11px] font-bold text-blue-400/80 uppercase tracking-[0.15em]">Contact</span>
+    </div>
+    <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Get In Touch</h1>
+    <p class="text-white/45 text-lg max-w-[500px] mx-auto">We'd love to hear from you. Reach out for queries, support, or appointments.</p>
+</div>
+
+<div class="grid md:grid-cols-2 gap-8 mb-16">
+    <!-- Contact Info Cards -->
+    <div class="space-y-4">
+        <div class="contact-card anim-fade-up-delay-1">
+            <div class="contact-icon bg-blue-500/10 border border-blue-500/20">
+                <i class="bi bi-geo-alt text-blue-400 text-xl"></i>
+            </div>
+            <div>
+                <h4 class="text-white font-bold text-sm mb-1">Address</h4>
+                <p class="text-white/45 text-sm m-0 leading-relaxed">KSP Care Central Lab<br>Tiger Circle, Manipal, Udupi<br>Karnataka 576104</p>
+            </div>
+        </div>
+        <div class="contact-card anim-fade-up-delay-2">
+            <div class="contact-icon bg-green-500/10 border border-green-500/20">
+                <i class="bi bi-telephone text-green-400 text-xl"></i>
+            </div>
+            <div>
+                <h4 class="text-white font-bold text-sm mb-1">Phone</h4>
+                <p class="text-white/45 text-sm m-0">+91 98765 43210<br><span class="text-white/25 text-xs">Available 24/7 for booking</span></p>
+            </div>
+        </div>
+        <div class="contact-card anim-fade-up-delay-3">
+            <div class="contact-icon bg-purple-500/10 border border-purple-500/20">
+                <i class="bi bi-envelope text-purple-400 text-xl"></i>
+            </div>
+            <div>
+                <h4 class="text-white font-bold text-sm mb-1">Email</h4>
+                <p class="text-white/45 text-sm m-0">contact@kspcare.com</p>
+            </div>
+        </div>
+        <div class="contact-card anim-fade-up-delay-4">
+            <div class="contact-icon bg-amber-500/10 border border-amber-500/20">
+                <i class="bi bi-clock text-amber-400 text-xl"></i>
+            </div>
+            <div>
+                <h4 class="text-white font-bold text-sm mb-1">Working Hours</h4>
+                <p class="text-white/45 text-sm m-0">Mon – Sat: 7:00 AM – 8:00 PM<br>Sunday: 8:00 AM – 2:00 PM</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Form -->
+    <div class="form-card anim-fade-up-delay-2">
+        <h3 class="text-xl font-bold text-white mb-6">Send us a message</h3>
+
+        @if (TempData["ContactSuccess"] != null) {
+            <div class="mb-5 p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm flex items-center gap-2 auto-dismiss">
+                <i class="bi bi-check-circle-fill"></i> @TempData["ContactSuccess"]
+            </div>
+        }
+        @if (TempData["ContactError"] != null) {
+            <div class="mb-5 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2">
+                <i class="bi bi-exclamation-triangle-fill"></i> @TempData["ContactError"]
+            </div>
+        }
+
+        <form asp-controller="Home" asp-action="SubmitContact" method="post" class="space-y-5">
+            @Html.AntiForgeryToken()
+            <div>
+                <label class="text-white/40 text-[11px] font-bold uppercase tracking-wider mb-2 block">Name</label>
+                <input type="text" name="Name" class="custom-input" placeholder="Your full name" required />
+            </div>
+            <div>
+                <label class="text-white/40 text-[11px] font-bold uppercase tracking-wider mb-2 block">Phone</label>
+                <input type="tel" name="Phone" class="custom-input" placeholder="Your phone number" required />
+            </div>
+            <div>
+                <label class="text-white/40 text-[11px] font-bold uppercase tracking-wider mb-2 block">Message</label>
+                <textarea rows="4" name="Message" class="custom-input" style="resize: none;" placeholder="How can we help you?" required></textarea>
+            </div>
+            <button type="submit"
+                class="w-full px-6 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-xl transition-all hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] flex items-center justify-center gap-2">
+                <i class="bi bi-send"></i> Send Message
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Map Section -->
+<div class="map-wrapper">
+    <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3881.0!2d74.79!3d13.35!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTPCsDIxJzAwLjAiTiA3NMKwNDcnMjQuMCJF!5e0!3m2!1sen!2sin!4v1!5m2!1sen!2sin"
+        allowfullscreen=""
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="KSP Care Location">
+    </iframe>
+</div>
+
